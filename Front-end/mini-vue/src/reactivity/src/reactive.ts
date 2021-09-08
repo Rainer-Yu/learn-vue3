@@ -1,4 +1,4 @@
-import { track } from "./effect"
+import {track, trigger} from "./effect"
 
 export function reactive<T extends object>(raw:T):T{    /* 得到什么类型 返回什么类型 */
 
@@ -6,14 +6,15 @@ export function reactive<T extends object>(raw:T):T{    /* 得到什么类型 �
         get(target, key){
             const res = Reflect.get(target, key)
 
-            // TODO 依赖收集
+            // 依赖收集
             track(target, key)
             return res
         },
         set(target, key, value){
             const res = Reflect.set(target, key, value)
 
-            // TODO 触发依赖执行
+            // 触发依赖执行
+            trigger(target, key)
             return res
         }
     })
