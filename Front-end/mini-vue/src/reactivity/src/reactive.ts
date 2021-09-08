@@ -1,3 +1,5 @@
+import { track } from "./effect"
+
 export function reactive<T extends object>(raw:T):T{    /* 得到什么类型 返回什么类型 */
 
     return new Proxy(raw,{
@@ -5,6 +7,7 @@ export function reactive<T extends object>(raw:T):T{    /* 得到什么类型 �
             const res = Reflect.get(target, key)
 
             // TODO 依赖收集
+            track(target, key)
             return res
         },
         set(target, key, value){
