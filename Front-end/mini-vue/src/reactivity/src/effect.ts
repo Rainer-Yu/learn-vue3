@@ -1,4 +1,5 @@
-
+type Dep = Set<ReactiveEffect | undefined>
+type KeyToDepMap = Map<any, Dep>
 let activeEffect: ReactiveEffect | undefined
 class ReactiveEffect<T = any>{
     private _fn: ()=>T
@@ -24,7 +25,7 @@ export function effect<T = any>(fn: ()=>T){
 }
 
 /* 这一段依赖收集的逻辑关系 需要多复习 */
-const targetMap = new Map()
+const targetMap = new WeakMap<object,KeyToDepMap>()
 /**
  * 依赖收集
  * @param target 
@@ -34,13 +35,11 @@ export function track(target:object,key:unknown){
     /* 依赖对应关系: target -> key -> dep */
     let depsMap = targetMap.get(target)
     if(!depsMap){
-        depsMap = new Map()
-        targetMap.set(target,depsMap)
+        targetMap.set(target,(depsMap = new Map() as KeyToDepMap))
     }
     let dep = depsMap.get(key)
     if(!dep){
-        dep = new Set()
-        depsMap.set(key,dep)
+        depsMap.set(key,(dep = new Set() as Dep))
     }
     dep.add(activeEffect)
 
@@ -51,9 +50,16 @@ export function track(target:object,key:unknown){
  */
 export function  trigger(target:object,key:unknown){
     let depsMap = targetMap.get(target)
-    let dep = depsMap.get(key)
 
-    for (const effect of dep) {
-        if(effect)effect?.run()
+    if(!depsMap){
+        return
     }
+
+    let dep = depsMap.get(key)
+    if(dep&&dep?.size>0){
+        dep.forEach((effect)=>{
+            if(effect) effect?.run()
+        })
+    }
+    
 }
