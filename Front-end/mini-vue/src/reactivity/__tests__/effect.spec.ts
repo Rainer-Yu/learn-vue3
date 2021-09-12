@@ -36,4 +36,34 @@ describe('effect', () => {
         // 调用effect(fn)返回的runner()函数会得到再次执行一次fn()后fn()的返回值
         expect(runner()).toBe(3)
     })
+
+    it('scheduler', () => {
+        let dummy
+        let run: any
+        const scheduler = jest.fn(() => {
+            run = runner
+        })
+        const obj = reactive({ foo: 1 })
+        const runner = effect(
+            () => {
+                dummy = obj.foo
+            },
+            { scheduler }
+        )
+        // 调用effect时默认会调用一次fn 不调用scheduler函数
+        expect(scheduler).not.toHaveBeenCalled()
+        expect(dummy).toBe(1)
+        /**
+         * 此后修改effect的依赖的值时
+         * 默认情况下有scheduler时会触发scheduler函数并且不调用fn()
+         * 无scheduler时,会触发调用fn()
+         */
+        obj.foo++
+        expect(scheduler).toHaveBeenCalledTimes(1)
+        expect(dummy).toBe(1)
+        // 手动运行runner函数时 只调用fn() 不会调用 scheduler函数
+        run() // 通过scheduler()函数把effect()返回的runner函数赋值给 run -> run===runner
+        expect(dummy).toBe(2)
+        expect(scheduler).toHaveBeenCalledTimes(1)
+    })
 })
