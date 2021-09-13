@@ -6,6 +6,7 @@ type Dep = Set<ReactiveEffect | undefined>
 type KeyToDepMap = Map<any, Dep>
 export type ReactiveEffectOptions = {
     scheduler?: EffectScheduler
+    onStop?: () => void
 }
 type EffectScheduler = (...args: any[]) => any
 export type ReactiveEffectRunner<T = any> = {
@@ -19,6 +20,7 @@ let activeEffect: ReactiveEffect | undefined
 class ReactiveEffect<T = any> {
     deps: Dep[] = []
     active = true /* 是否没有被stop() */
+    onStop?: () => void /* effect() options里的onStop函数  */
     constructor(
         public fn: () => T,
         public scheduler: EffectScheduler | null = null
@@ -33,6 +35,9 @@ class ReactiveEffect<T = any> {
         /* 如果没有被stop 则清空对应依赖 如果已经stop过 跳过依赖清空过程 */
         if (this.active) {
             cleanupEffect(this)
+            if (this.onStop) {
+                this.onStop()
+            }
             this.active = false
         }
     }
@@ -76,6 +81,10 @@ const targetMap = new WeakMap<object, KeyToDepMap>()
  * 依赖收集
  */
 export function track(target: object, key: unknown) {
+    if (activeEffect === void 0) {
+        return /* 如果activeEffect是 undefined 则跳过依赖收集 */
+    }
+
     /* 依赖对应关系: target -> key -> dep */
     let depsMap = targetMap.get(target)
     if (!depsMap) {
@@ -87,7 +96,7 @@ export function track(target: object, key: unknown) {
     }
     dep.add(activeEffect!)
     /* 反向收集 dep */
-    activeEffect?.deps.push(dep)
+    activeEffect!.deps.push(dep)
 }
 
 /**
