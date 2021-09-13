@@ -1,5 +1,5 @@
 import { reactive } from '../src/reactive'
-import { effect } from '../src/effect'
+import { effect, stop } from '../src/effect'
 describe('effect', () => {
     it('happy path', () => {
         const user = reactive({
@@ -65,5 +65,22 @@ describe('effect', () => {
         run() // 通过scheduler()函数把effect()返回的runner函数赋值给 run -> run===runner
         expect(dummy).toBe(2)
         expect(scheduler).toHaveBeenCalledTimes(1)
+    })
+
+    it('stop', () => {
+        let dummy
+        const obj = reactive({ prop: 1 })
+        const runner = effect(() => {
+            dummy = obj.prop
+        })
+        obj.prop = 2
+        expect(dummy).toBe(2)
+        stop(runner)
+        obj.prop = 3
+        expect(dummy).toBe(2)
+
+        // stopped effect should still be manually callable
+        runner()
+        expect(dummy).toBe(3)
     })
 })
