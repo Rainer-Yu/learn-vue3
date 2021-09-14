@@ -1,4 +1,8 @@
-import { mutableHandlers, readonlyHandlers } from './baseHandlers'
+import {
+    mutableHandlers,
+    readonlyHandlers,
+    shallowReadonlyHandlers
+} from './baseHandlers'
 
 export const enum ReactiveFlags {
     IS_REACTIVE = '__v_isReactive',
@@ -11,30 +15,33 @@ type Target = {
 
 /**
  * 创建并返回一个响应式对象
- * @param target
+ * @param raw
  */
-export function reactive<T extends object>(target: T): T {
-    return createReactiveObject(target, mutableHandlers)
+export function reactive<T extends object>(raw: T): T {
+    return createReactiveObject(raw, mutableHandlers)
 }
 
 /**
  * 返回原始对象的只读代理
- * @param target
+ * @param raw
  */
-export function readonly<T extends object>(target: T): T {
-    return createReactiveObject(target, readonlyHandlers)
+export function readonly<T extends object>(raw: T): T {
+    return createReactiveObject(raw, readonlyHandlers)
+}
+export function shallowReadonly<T extends object>(raw: T): T {
+    return createReactiveObject(raw, shallowReadonlyHandlers)
 }
 
 /**
  * 创建反应对象
- * @param raw 原始对象
+ * @param target 原始对象
  * @param baseHandlers Proxy处理函数的对象
  */
 function createReactiveObject<T extends object>(
-    raw: T,
+    target: T,
     baseHandlers: ProxyHandler<any>
 ) {
-    return new Proxy<T>(raw, baseHandlers)
+    return new Proxy<T>(target, baseHandlers)
 }
 
 export function isReactive(value: unknown): boolean {

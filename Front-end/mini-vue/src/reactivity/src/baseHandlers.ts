@@ -13,6 +13,7 @@ const reactvieGet = createGetter()
 const reactvieSet = createSetter()
 const readonlyGet = createGetter(true)
 const readonlySet = createSetter(true)
+const shallowReadonlyGet = createGetter(true, true)
 
 export const mutableHandlers: ProxyHandler<object> = {
     get: reactvieGet,
@@ -22,12 +23,19 @@ export const readonlyHandlers: ProxyHandler<object> = {
     get: readonlyGet,
     set: readonlySet
 }
+export const shallowReadonlyHandlers: ProxyHandler<object> = {
+    get: shallowReadonlyGet,
+    set: readonlySet
+}
 
 /**
  * 创建proxy对象的get方法
  * @param isReadonly
  */
-function createGetter(isReadonly: boolean = false): ReactiveGetter {
+function createGetter(
+    isReadonly: boolean = false,
+    shallow: boolean = false
+): ReactiveGetter {
     return (target, key) => {
         // isReactive和isReadonly 检测 不是readonly的就是reactive
         if (key === ReactiveFlags.IS_REACTIVE) {
@@ -37,6 +45,11 @@ function createGetter(isReadonly: boolean = false): ReactiveGetter {
         }
 
         const res = Reflect.get(target, key)
+
+        // 不执行嵌套对象的深度readonly转换
+        if (shallow) {
+            return res
+        }
 
         // 实现 reactive和readonly 的嵌套对象转换
         if (isObject(res)) {
