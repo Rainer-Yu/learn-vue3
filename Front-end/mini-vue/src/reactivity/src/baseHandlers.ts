@@ -1,5 +1,6 @@
+import { isObject } from '../../shared'
 import { track, trigger } from './effect'
-import { ReactiveFlags } from './reactive'
+import { reactive, ReactiveFlags } from './reactive'
 
 type ReactiveGetter = <T extends object>(target: T, key: string | symbol) => T
 type ReactiveSetter = <T extends object>(
@@ -36,6 +37,11 @@ function createGetter(isReadonly: boolean = false): ReactiveGetter {
         }
 
         const res = Reflect.get(target, key)
+
+        // 实现 reactive 嵌套对象转换
+        if (isObject(res)) {
+            return reactive(res)
+        }
 
         // 当不是readonly创建的代理对象时(reactive) 进行依赖收集
         if (!isReadonly) {
