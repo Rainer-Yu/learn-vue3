@@ -1,13 +1,15 @@
-import { isReadonly, readonly } from '../src/reactive'
+import { isProxy, isReadonly, readonly } from '../src/reactive'
 
 describe('readonly', () => {
     it('happy path', () => {
         const original = { foo: 1, bar: { baz: 2 } }
         const wrapped = readonly(original)
 
-        // readonly 代理后生成一个与源对象内容相同新的对象
+        // readonly 代理后生成一个与源对象内容相同新的proxy对象
         expect(wrapped).not.toBe(original)
+        expect(isProxy(wrapped)).toBe(true)
         expect(isReadonly(wrapped)).toBe(true)
+        expect(isProxy(original)).toBe(false)
         expect(isReadonly(original)).toBe(false)
         expect(wrapped.foo).toBe(1)
         expect(wrapped.bar.baz).toBe(2)
