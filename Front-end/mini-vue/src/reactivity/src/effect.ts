@@ -101,13 +101,8 @@ const targetMap = new WeakMap<object, KeyToDepMap>()
  * 依赖收集
  */
 export function track(target: object, key: unknown) {
-    if (activeEffect === void 0) {
-        return /* 如果activeEffect是 undefined 则跳过依赖收集 */
-    }
-    console.log('shouldTrack', shouldTrack)
-
-    if (!shouldTrack) return
-    console.log('-+-')
+    /* 判断是否进行依赖收集 不需要的直接 return */
+    if (!isTracking()) return
 
     /* 依赖对应关系: target -> key -> dep */
     let depsMap = targetMap.get(target)
@@ -118,9 +113,21 @@ export function track(target: object, key: unknown) {
     if (!dep) {
         depsMap.set(key, (dep = new Set() as Dep))
     }
+    /* 已经收集过的依赖 就不需要重复收集了 */
+    if (dep.has(activeEffect!)) return
+
+    /* 未收集的依赖 进行收集 并且当前effect进行反向收集 dep */
     dep.add(activeEffect!)
-    /* 反向收集 dep */
     activeEffect!.deps.push(dep)
+}
+
+/**
+ * 是否进行依赖收集
+ */
+export function isTracking() {
+    /* 如果activeEffect是 undefined 则跳过依赖收集 */
+    /* 如果shouldTrack为false 则跳过依赖收集 */
+    return activeEffect !== void 0 && shouldTrack
 }
 
 /**
