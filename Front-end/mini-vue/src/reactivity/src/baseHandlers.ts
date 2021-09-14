@@ -1,4 +1,5 @@
 import { track, trigger } from './effect'
+import { ReactiveFlags } from './reactive'
 
 type ReactiveGetter = <T extends object>(target: T, key: string | symbol) => T
 type ReactiveSetter = <T extends object>(
@@ -27,6 +28,11 @@ export const readonlyHandlers: ProxyHandler<object> = {
  */
 function createGetter(isReadonly: boolean = false): ReactiveGetter {
     return (target, key) => {
+        /* isReactive检测 */
+        if (key === ReactiveFlags.IS_REACTIVE) {
+            return !isReadonly /* 只要不是readonly的就是reactive */
+        }
+
         const res = Reflect.get(target, key)
 
         // 不是 readonly时进行依赖收集
