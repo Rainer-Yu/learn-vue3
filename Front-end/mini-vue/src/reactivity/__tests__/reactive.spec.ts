@@ -19,6 +19,7 @@ describe('reactive', () => {
             array: [{ bar: 2 }]
         }
         const observed = reactive(original)
+        // 只有嵌套的对象被转换为 reactive
         expect(isReactive(observed.text)).toBe(false)
         expect(isReactive(observed.nested)).toBe(true)
         expect(isReactive(observed.array)).toBe(true)

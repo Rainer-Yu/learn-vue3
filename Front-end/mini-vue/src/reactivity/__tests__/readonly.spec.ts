@@ -24,4 +24,20 @@ describe('readonly', () => {
         user.age++
         expect(console.warn).toBeCalledTimes(2)
     })
+
+    it('nested readonlys', () => {
+        const original = {
+            text: 'some text',
+            nested: {
+                foo: 1
+            },
+            array: [{ bar: 2 }]
+        }
+        const wrapped = readonly(original)
+        // 只有嵌套的对象被转换为 readonly
+        expect(isReadonly(wrapped.text)).toBe(false)
+        expect(isReadonly(wrapped.nested)).toBe(true)
+        expect(isReadonly(wrapped.array)).toBe(true)
+        expect(isReadonly(wrapped.array[0])).toBe(true)
+    })
 })
