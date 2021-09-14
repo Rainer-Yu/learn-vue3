@@ -1,7 +1,8 @@
 import {
-    mutableHandlers,
+    reactiveHandlers,
     readonlyHandlers,
-    shallowReadonlyHandlers
+    shallowReadonlyHandlers,
+    shallowReactiveHandlers
 } from './baseHandlers'
 
 export const enum ReactiveFlags {
@@ -18,7 +19,10 @@ type Target = {
  * @param raw
  */
 export function reactive<T extends object>(raw: T): T {
-    return createReactiveObject(raw, mutableHandlers)
+    return createReactiveObject(raw, reactiveHandlers)
+}
+export function shallowReactive<T extends object>(raw: T): T {
+    return createReactiveObject(raw, shallowReactiveHandlers)
 }
 
 /**

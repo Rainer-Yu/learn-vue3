@@ -11,12 +11,17 @@ type ReactiveSetter = <T extends object>(
 
 const reactvieGet = createGetter()
 const reactvieSet = createSetter()
+const shallowReactiveGet = createGetter(false, true)
 const readonlyGet = createGetter(true)
 const readonlySet = createSetter(true)
 const shallowReadonlyGet = createGetter(true, true)
 
-export const mutableHandlers: ProxyHandler<object> = {
+export const reactiveHandlers: ProxyHandler<object> = {
     get: reactvieGet,
+    set: reactvieSet
+}
+export const shallowReactiveHandlers: ProxyHandler<object> = {
+    get: shallowReactiveGet,
     set: reactvieSet
 }
 export const readonlyHandlers: ProxyHandler<object> = {
