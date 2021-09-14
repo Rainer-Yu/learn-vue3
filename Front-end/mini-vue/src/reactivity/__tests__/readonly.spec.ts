@@ -5,7 +5,7 @@ describe('readonly', () => {
         const original = { foo: 1, bar: { baz: 2 } }
         const wrapped = readonly(original)
 
-        /* readonly 代理后生成一个与源对象内容相同新的对象 */
+        // readonly 代理后生成一个与源对象内容相同新的对象
         expect(wrapped).not.toBe(original)
         expect(isReadonly(wrapped)).toBe(true)
         expect(isReadonly(original)).toBe(false)
@@ -14,7 +14,7 @@ describe('readonly', () => {
     })
 
     it('should warn when called set', () => {
-        /* readonly() 创建的proxy对象不可以被set */
+        // readonly() 创建的proxy对象不可以被set
         console.warn = jest.fn()
         const user = readonly({
             age: 10

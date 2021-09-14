@@ -28,7 +28,7 @@ export const readonlyHandlers: ProxyHandler<object> = {
  */
 function createGetter(isReadonly: boolean = false): ReactiveGetter {
     return (target, key) => {
-        /* isReactive/isReadonly 检测 不是readonly的就是reactive */
+        // isReactive和isReadonly 检测 不是readonly的就是reactive
         if (key === ReactiveFlags.IS_REACTIVE) {
             return !isReadonly
         } else if (key === ReactiveFlags.IS_READONLY) {
@@ -37,7 +37,7 @@ function createGetter(isReadonly: boolean = false): ReactiveGetter {
 
         const res = Reflect.get(target, key)
 
-        // 不是 readonly时进行依赖收集
+        // 当不是readonly创建的代理对象时(reactive) 进行依赖收集
         if (!isReadonly) {
             track(target, key)
         }
@@ -50,6 +50,8 @@ function createGetter(isReadonly: boolean = false): ReactiveGetter {
  */
 function createSetter(isReadonly: boolean = false): ReactiveSetter {
     if (isReadonly) {
+        // 如果是readonly创建的代理对象
+        // 触发 set 操作时控制台进行警告提示
         return (target, key) => {
             console.warn(
                 `Set operation on key "${String(key)}" failed: target is readonly.`,
@@ -58,6 +60,7 @@ function createSetter(isReadonly: boolean = false): ReactiveSetter {
             return true
         }
     } else {
+        // 如果是reactive创建的代理对象 触发 set 操作时 触发依赖执行
         return (target, key, value) => {
             const res = Reflect.set(target, key, value)
             // 触发依赖执行

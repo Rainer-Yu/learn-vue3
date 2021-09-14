@@ -17,11 +17,9 @@ describe('effect', () => {
         expect(nextAge).toBe(12)
     })
 
-    /**
-     * 调用 effect(fn) ->  返回一个 runner函数
-     *  ->  手动调用 runner()时 ->  会调用effect(fn)内的 fn()
-     *  ->  返回fn()的返回值
-     */
+    //   调用 effect(fn) ->  返回一个 runner函数
+    //    ->  手动调用 runner()时 ->  会调用effect(fn)内的 fn()
+    //    ->  返回fn()的返回值
     it('should return runner when call effect', () => {
         let foo = 0
         const runner = effect(() => {
@@ -53,11 +51,10 @@ describe('effect', () => {
         // 调用effect时默认会调用一次fn 不调用scheduler函数
         expect(scheduler).not.toHaveBeenCalled()
         expect(dummy).toBe(1)
-        /**
-         * 此后修改effect的依赖的值时
-         * 默认情况下有scheduler时会触发scheduler函数并且不调用fn()
-         * 无scheduler时,会触发调用fn()
-         */
+
+        //  此后修改effect的依赖的值时
+        //  默认情况下有scheduler时会触发scheduler函数并且不调用fn()
+        //  无scheduler时,会触发调用fn()
         obj.foo++
         expect(scheduler).toHaveBeenCalledTimes(1)
         expect(dummy).toBe(1)
@@ -90,6 +87,8 @@ describe('effect', () => {
             onStop
         })
 
+        // 对effect()返回的runner执行stop()操作时
+        // 会执行一次,生成runner函数时传入的 onStop 函数
         stop(runner)
         expect(onStop).toBeCalledTimes(1)
     })

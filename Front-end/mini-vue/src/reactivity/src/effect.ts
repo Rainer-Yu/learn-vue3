@@ -14,15 +14,19 @@ export type ReactiveEffectRunner<T = any> = {
     effect: ReactiveEffect
 }
 
-/* 全局变量: 当前 effect */
+/**
+ * 全局变量
+ * activeEffect 指向当前 effect
+ * shouldTrack 依赖收集标志
+ */
 let activeEffect: ReactiveEffect | undefined
 let shouldTrack: boolean = false
 
 class ReactiveEffect<T = any> {
     public deps: Dep[] = []
-    /* 是否是活跃的 (没有被stop) */
+    // 是否是活跃的 (没有被stop)
     public active: boolean = true
-    /* effect() options里的onStop函数  */
+    // effect() options里的onStop函数
     public onStop?: () => void
     constructor(
         public fn: () => T,
@@ -30,21 +34,23 @@ class ReactiveEffect<T = any> {
     ) {}
 
     run() {
-        /* effect没有stop过 是活跃的 打开依赖收集标志 
-        并将全局变量activeEffect 指向当前 effect */
+        // effect没有stop过 是活跃的 打开依赖收集标志
+        // 并将全局变量activeEffect 指向当前 effect
         if (this.active) {
             shouldTrack = true
             activeEffect = this
         }
-        /* 运行 fn() 会触发依赖收集 根据依赖收集标志shouldTrack判断是否执行track() */
+        // 因为fn()中有可能包含reactive代理对象
+        // 对reactive代理对象的get操作会触发依赖收集
+        // 依赖收集函数track()会根据依赖收集标志shouldTrack判断是否执行
         const result = this.fn()
-        /* effect已经stop的 关闭依赖收集标志 */
+        // 执行过fn()后将依赖收集标志shouldTrack重置为false
         shouldTrack = false
         return result
     }
 
     stop() {
-        /* 如果是活跃的 则清空对应依赖 如果已经stop过 跳过依赖清空过程 */
+        // 如果是活跃的 则清空对应依赖 如果已经stop过 跳过依赖清空过程
         if (this.active) {
             cleanupEffect(this)
             if (this.onStop) {
@@ -59,11 +65,11 @@ class ReactiveEffect<T = any> {
  * 从包含当前effect的依赖(dep)中 清除当前effect 并把effect内的deps清空
  */
 function cleanupEffect(effect: ReactiveEffect) {
-    /* 从包含当前effect的依赖(dep)中 清除当前effect */
+    // 从包含当前effect的依赖(dep)中 清除当前effect
     effect.deps.forEach((dep) => {
         dep.delete(effect)
     })
-    /* 清空effect内的deps */
+    // 清空effect内的deps
     effect.deps.length = 0
 }
 
@@ -82,7 +88,7 @@ export function effect<T = any>(
     }
 
     _effect.run()
-    /* 返回当前 effect对应的的run()方法 */
+    // 返回当前 effect对应的的run()方法
     const runner = _effect.run.bind(_effect) as ReactiveEffectRunner
     runner.effect = _effect
     return runner
@@ -101,10 +107,10 @@ const targetMap = new WeakMap<object, KeyToDepMap>()
  * 依赖收集
  */
 export function track(target: object, key: unknown) {
-    /* 判断是否进行依赖收集 不需要的直接 return */
+    // 判断是否进行依赖收集 不需要的直接 return
     if (!isTracking()) return
 
-    /* 依赖对应关系: target -> key -> dep */
+    // 依赖对应关系: target -> key -> dep
     let depsMap = targetMap.get(target)
     if (!depsMap) {
         targetMap.set(target, (depsMap = new Map() as KeyToDepMap))
@@ -113,10 +119,10 @@ export function track(target: object, key: unknown) {
     if (!dep) {
         depsMap.set(key, (dep = new Set() as Dep))
     }
-    /* 已经收集过的依赖 就不需要重复收集了 */
+    // 已经收集过的依赖 就不需要重复收集了
     if (dep.has(activeEffect!)) return
 
-    /* 未收集的依赖 进行收集 并且当前effect进行反向收集 dep */
+    // 未收集的依赖 进行收集 并且当前effect进行反向收集 dep
     dep.add(activeEffect!)
     activeEffect!.deps.push(dep)
 }
@@ -125,8 +131,8 @@ export function track(target: object, key: unknown) {
  * 是否进行依赖收集
  */
 export function isTracking() {
-    /* 如果activeEffect是 undefined 则跳过依赖收集 */
-    /* 如果shouldTrack为false 则跳过依赖收集 */
+    // 如果activeEffect是 undefined 则跳过依赖收集
+    // 如果shouldTrack为false 则跳过依赖收集
     return activeEffect !== void 0 && shouldTrack
 }
 
