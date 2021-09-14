@@ -3,7 +3,7 @@ import { effect, stop } from '../src/effect'
 describe('effect', () => {
     it('happy path', () => {
         const user = reactive({
-            age: 10,
+            age: 10
         })
 
         let nextAge
@@ -76,10 +76,10 @@ describe('effect', () => {
         obj.prop = 2
         expect(dummy).toBe(2)
         stop(runner)
-        obj.prop = 3
+        obj.prop++
         expect(dummy).toBe(2)
 
-        // stopped effect should still be manually callable
+        // stop掉的effect 应该仍然可以手动调用 runner
         runner()
         expect(dummy).toBe(3)
     })
@@ -87,7 +87,7 @@ describe('effect', () => {
     it('onStop', () => {
         const onStop = jest.fn()
         const runner = effect(() => {}, {
-            onStop,
+            onStop
         })
 
         stop(runner)
