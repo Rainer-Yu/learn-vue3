@@ -1,10 +1,12 @@
 import { mutableHandlers, readonlyHandlers } from './baseHandlers'
 
 export const enum ReactiveFlags {
-    IS_REACTIVE = '__v_isReactive'
+    IS_REACTIVE = '__v_isReactive',
+    IS_READONLY = '__v_isReadonly'
 }
 type Target = {
     [ReactiveFlags.IS_REACTIVE]?: boolean
+    [ReactiveFlags.IS_READONLY]?: boolean
 }
 
 /**
@@ -37,4 +39,7 @@ function createReactiveObject<T extends object>(
 
 export function isReactive(value: unknown): boolean {
     return !!(value as Target)[ReactiveFlags.IS_REACTIVE]
+}
+export function isReadonly(value: unknown): boolean {
+    return !!(value as Target)[ReactiveFlags.IS_READONLY]
 }

@@ -28,9 +28,11 @@ export const readonlyHandlers: ProxyHandler<object> = {
  */
 function createGetter(isReadonly: boolean = false): ReactiveGetter {
     return (target, key) => {
-        /* isReactive检测 */
+        /* isReactive/isReadonly 检测 不是readonly的就是reactive */
         if (key === ReactiveFlags.IS_REACTIVE) {
-            return !isReadonly /* 只要不是readonly的就是reactive */
+            return !isReadonly
+        } else if (key === ReactiveFlags.IS_READONLY) {
+            return isReadonly
         }
 
         const res = Reflect.get(target, key)
