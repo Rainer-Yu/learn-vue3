@@ -2,7 +2,7 @@ import { extend } from '../../shared'
 /**
  * TS 类型
  */
-type Dep = Set<ReactiveEffect | undefined>
+export type Dep = Set<ReactiveEffect>
 type KeyToDepMap = Map<any, Dep>
 export type ReactiveEffectOptions = {
     scheduler?: EffectScheduler
