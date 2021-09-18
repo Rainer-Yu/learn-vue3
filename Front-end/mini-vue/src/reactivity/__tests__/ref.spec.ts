@@ -1,6 +1,6 @@
 import { effect } from '../src/effect'
 import { isReactive } from '../src/reactive'
-import { isRef, ref, unref } from '../src/ref'
+import { isRef, proxyRefs, ref, unref } from '../src/ref'
 describe('reactivity/ref', () => {
     it('ref happy path', () => {
         const a = ref(1)
@@ -67,5 +67,26 @@ describe('reactivity/ref', () => {
     it('unref', () => {
         expect(unref(1)).toBe(1)
         expect(unref(ref(1))).toBe(1)
+    })
+
+    it('proxyRefs', () => {
+        const user = {
+            age: ref(10),
+            name: 'xiaohong'
+        }
+
+        const proxyUser = proxyRefs(user)
+        expect(user.age.value).toBe(10)
+        expect(proxyUser.age).toBe(10)
+        expect(proxyUser.name).toBe('xiaohong')
+        // TODO 把 Ref<T> 类型 转换为 T
+        proxyUser.age = 20
+
+        expect(proxyUser.age).toBe(20)
+        expect(user.age.value).toBe(20)
+
+        proxyUser.age = ref(10)
+        expect(proxyUser.age).toBe(10)
+        expect(user.age.value).toBe(10)
     })
 })

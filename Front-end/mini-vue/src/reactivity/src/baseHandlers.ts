@@ -12,9 +12,11 @@ type ReactiveSetter = <T extends object>(
 const reactvieGet = createGetter()
 const reactvieSet = createSetter()
 const shallowReactiveGet = createGetter(false, true)
+const shallowReactiveSet = reactvieSet
 const readonlyGet = createGetter(true)
 const readonlySet = createSetter(true)
 const shallowReadonlyGet = createGetter(true, true)
+const shallowReadonlySet = readonlySet
 
 export const reactiveHandlers: ProxyHandler<object> = {
     get: reactvieGet,
@@ -22,7 +24,7 @@ export const reactiveHandlers: ProxyHandler<object> = {
 }
 export const shallowReactiveHandlers: ProxyHandler<object> = {
     get: shallowReactiveGet,
-    set: reactvieSet
+    set: shallowReactiveSet
 }
 export const readonlyHandlers: ProxyHandler<object> = {
     get: readonlyGet,
@@ -30,7 +32,7 @@ export const readonlyHandlers: ProxyHandler<object> = {
 }
 export const shallowReadonlyHandlers: ProxyHandler<object> = {
     get: shallowReadonlyGet,
-    set: readonlySet
+    set: shallowReadonlySet
 }
 
 /**

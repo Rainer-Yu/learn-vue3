@@ -65,5 +65,23 @@ export function ref(raw?: unknown) {
 /** 检查变量是否为一个 ref 对象 */
 export const isRef = <T>(value: Ref<T> | unknown): value is Ref<T> =>
     !!(value as any).__v_isRef === true
+
 /** 如果参数是一个 ref，则返回内部值，否则返回参数本身 */
 export const unref = <T>(ref: Ref<T> | T): T => (isRef(ref) ? ref.value : ref)
+
+/** proxyRefs */
+export function proxyRefs<T extends object>(objectWithRefs: T): T {
+    return new Proxy(objectWithRefs, shallowUnwrapRefHandlers)
+}
+const shallowUnwrapRefHandlers: ProxyHandler<any> = {
+    get: (target, key, receiver) => unref(Reflect.get(target, key, receiver)),
+    set: (target, key, newValue, receiver) => {
+        const oldValue = Reflect.get(target, key, receiver)
+        if (isRef(oldValue) && !isRef(newValue)) {
+            oldValue.value = newValue
+            return true
+        } else {
+            return Reflect.set(target, key, newValue, receiver)
+        }
+    }
+}
