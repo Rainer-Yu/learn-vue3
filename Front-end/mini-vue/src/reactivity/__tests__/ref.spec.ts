@@ -1,6 +1,6 @@
 import { effect } from '../src/effect'
 import { isReactive } from '../src/reactive'
-import { ref } from '../src/ref'
+import { isRef, ref, unref } from '../src/ref'
 describe('reactivity/ref', () => {
     it('ref happy path', () => {
         const a = ref(1)
@@ -52,5 +52,20 @@ describe('reactivity/ref', () => {
         expect(dummy).toBe(1)
         a.value.count = 2
         expect(dummy).toBe(2)
+    })
+
+    it('isRef', () => {
+        expect(isRef(ref(1))).toBe(true)
+        // expect(isRef(computed(() => 1))).toBe(true)
+
+        expect(isRef(0)).toBe(false)
+        expect(isRef(1)).toBe(false)
+        // 看起来像 ref 的对象不一定是 ref
+        expect(isRef({ value: 0 })).toBe(false)
+    })
+
+    it('unref', () => {
+        expect(unref(1)).toBe(1)
+        expect(unref(ref(1))).toBe(1)
     })
 })
