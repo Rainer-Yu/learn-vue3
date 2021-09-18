@@ -1,8 +1,8 @@
 import { extend } from '../../shared'
+import { Dep } from './dep'
 /**
  * TS 类型
  */
-export type Dep = Set<ReactiveEffect>
 type KeyToDepMap = Map<any, Dep>
 export type ReactiveEffectOptions = {
     scheduler?: EffectScheduler
@@ -22,7 +22,7 @@ export type ReactiveEffectRunner<T = any> = {
 let activeEffect: ReactiveEffect | undefined
 let shouldTrack: boolean = false
 
-class ReactiveEffect<T = any> {
+export class ReactiveEffect<T = any> {
     public deps: Dep[] = []
     // 是否是活跃的 (没有被stop)
     public active: boolean = true
@@ -83,9 +83,7 @@ export function effect<T = any>(
 ): ReactiveEffectRunner {
     const _effect = new ReactiveEffect(fn)
 
-    if (options) {
-        extend(_effect, options)
-    }
+    options && extend(_effect, options)
 
     _effect.run()
     // 返回当前 effect对应的的run()方法
@@ -104,7 +102,7 @@ export function stop(runner: ReactiveEffectRunner) {
 // REVIEW  这一段依赖收集的逻辑关系 需要多复习
 const targetMap = new WeakMap<object, KeyToDepMap>()
 /**
- * 依赖收集
+ * 依赖收集(从reactive的target->key->dep 然后收集依赖)
  */
 export function track(target: object, key: unknown) {
     // 判断是否进行依赖收集 不需要的直接 return
@@ -119,6 +117,12 @@ export function track(target: object, key: unknown) {
     if (!dep) {
         depsMap.set(key, (dep = new Set() as Dep))
     }
+    trackEffects(dep)
+}
+/**
+ * 依赖收集(直接收集dep依赖)
+ */
+export function trackEffects(dep: Dep) {
     // 已经收集过的依赖 就不需要重复收集了
     if (dep.has(activeEffect!)) return
 
@@ -128,7 +132,7 @@ export function track(target: object, key: unknown) {
 }
 
 /**
- * 是否进行依赖收集
+ * 判断是否应该进行进行依赖收集
  */
 export function isTracking() {
     // 如果activeEffect是 undefined 则跳过依赖收集
@@ -137,26 +141,25 @@ export function isTracking() {
 }
 
 /**
- * 触发依赖执行
+ * 触发依赖执行(从reactive的target->key->dep 然后收集依赖)
  */
 export function trigger(target: object, key: unknown) {
     let depsMap = targetMap.get(target)
-
-    if (!depsMap) {
-        return
-    }
+    // 没有收集过依赖(tracked),直接跳过trigger
+    if (!depsMap) return
 
     let dep = depsMap.get(key)
-
-    if (dep && dep.size > 0) {
-        dep.forEach((effect) => {
-            if (!effect) {
-                return
-            } else if (effect.scheduler) {
-                effect.scheduler()
-            } else {
-                effect.run()
-            }
-        })
-    }
+    dep && triggerEffects(dep)
+}
+/**
+ * 触发依赖执行(直接触发dep中的依赖)
+ */
+export function triggerEffects(dep: Dep) {
+    dep.forEach((effect) => {
+        if (effect.scheduler) {
+            effect.scheduler()
+        } else {
+            effect.run()
+        }
+    })
 }

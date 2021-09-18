@@ -17,8 +17,9 @@ type Target = {
 /**
  * 创建并返回一个响应式对象
  * @param raw
- */
-export function reactive<T extends object>(raw: T): T {
+ */ /* TS重载 */
+export function reactive<T extends object>(target: T): T
+export function reactive(raw: object) {
     return createReactiveObject(raw, reactiveHandlers)
 }
 export function shallowReactive<T extends object>(raw: T): T {
