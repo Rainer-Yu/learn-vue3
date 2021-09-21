@@ -54,7 +54,7 @@ const convertObjectToReactive = <T extends unknown>(value: T): T =>
     isObject(value) ? reactive(value) : value
 
 /** 收集ref的依赖 */
-function trackRefValue(ref: RefBase<any>) {
+export function trackRefValue(ref: RefBase<any>) {
     // 判断是否应该进行进行依赖收集
     // 如果这个ref被收集过依赖并且对应的effect没有被stop过的话,进行依赖收集
     if (!isTracking()) return
