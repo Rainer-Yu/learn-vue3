@@ -84,7 +84,7 @@ describe('reactivity/ref', () => {
 
         expect(proxyUser.age).toBe(20)
         expect(user.age.value).toBe(20)
-
+        // @ts-ignore
         proxyUser.age = ref(10)
         expect(proxyUser.age).toBe(10)
         expect(user.age.value).toBe(10)

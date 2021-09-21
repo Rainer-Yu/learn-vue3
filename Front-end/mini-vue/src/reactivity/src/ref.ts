@@ -10,6 +10,17 @@ type RefBase<T> = {
     dep?: Dep
     value: T
 }
+// proxyRefs中 Ref 类型浅解包
+export type ShallowUnwrapRef<T> = {
+    // 如果 `V` 是`unknown` ，则表示它不是 extend `Ref` 并且是 undefined
+    [K in keyof T]: T[K] extends Ref<infer V>
+        ? V
+        : T[K] extends Ref<infer V> | undefined
+        ? unknown extends V
+            ? undefined
+            : V | undefined
+        : T[K]
+}
 
 // Ref实现类
 class RefImpl<T> {
@@ -69,10 +80,11 @@ export const isRef = <T>(value: Ref<T> | unknown): value is Ref<T> =>
 /** 如果参数是一个 ref，则返回内部值，否则返回参数本身 */
 export const unref = <T>(ref: Ref<T> | T): T => (isRef(ref) ? ref.value : ref)
 
-/** proxyRefs */
-export function proxyRefs<T extends object>(objectWithRefs: T): T {
+/** proxyRefs 对 object对象中的 ref 进行浅解包 */
+export function proxyRefs<T extends object>(objectWithRefs: T): ShallowUnwrapRef<T> {
     return new Proxy(objectWithRefs, shallowUnwrapRefHandlers)
 }
+
 const shallowUnwrapRefHandlers: ProxyHandler<any> = {
     get: (target, key, receiver) => unref(Reflect.get(target, key, receiver)),
     set: (target, key, newValue, receiver) => {
