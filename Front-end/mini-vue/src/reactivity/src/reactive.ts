@@ -7,23 +7,31 @@ import {
 
 export const enum ReactiveFlags {
     IS_REACTIVE = '__v_isReactive',
-    IS_READONLY = '__v_isReadonly'
+    IS_READONLY = '__v_isReadonly',
+    RAW = '__v_raw'
 }
 export type Target = {
     [ReactiveFlags.IS_REACTIVE]?: boolean
     [ReactiveFlags.IS_READONLY]?: boolean
+    [ReactiveFlags.RAW]?: any
 }
 
+export type ProxyToRawWeakMap = WeakMap<Target, any>
+// 储存reactive和其原始对象对应关系的 全局WeakMap
+export const reactiveMap: ProxyToRawWeakMap = new WeakMap<Target, any>()
+export const shallowReactiveMap: ProxyToRawWeakMap = new WeakMap<Target, any>()
+export const readonlyMap: ProxyToRawWeakMap = new WeakMap<Target, any>()
+export const shallowReadonlyMap: ProxyToRawWeakMap = new WeakMap<Target, any>()
 /**
  * 创建并返回一个响应式对象
  * @param raw
  */ /* TS重载 */
 export function reactive<T extends object>(target: T): T
 export function reactive(raw: object) {
-    return createReactiveObject(raw, reactiveHandlers)
+    return createReactiveObject(raw, reactiveHandlers, reactiveMap)
 }
 export function shallowReactive<T extends object>(raw: T): T {
-    return createReactiveObject(raw, shallowReactiveHandlers)
+    return createReactiveObject(raw, shallowReactiveHandlers, shallowReactiveMap)
 }
 
 /**
@@ -31,10 +39,10 @@ export function shallowReactive<T extends object>(raw: T): T {
  * @param raw
  */
 export function readonly<T extends object>(raw: T): T {
-    return createReactiveObject(raw, readonlyHandlers)
+    return createReactiveObject(raw, readonlyHandlers, readonlyMap)
 }
 export function shallowReadonly<T extends object>(raw: T): T {
-    return createReactiveObject(raw, shallowReadonlyHandlers)
+    return createReactiveObject(raw, shallowReadonlyHandlers, shallowReadonlyMap)
 }
 
 /**
@@ -44,9 +52,17 @@ export function shallowReadonly<T extends object>(raw: T): T {
  */
 function createReactiveObject<T extends object>(
     target: T,
-    baseHandlers: ProxyHandler<any>
+    baseHandlers: ProxyHandler<any>,
+    proxyMap: ProxyToRawWeakMap
 ) {
-    return new Proxy<T>(target, baseHandlers)
+    // target 已经具有相应的 Proxy
+    const existingProxy = proxyMap.get(target)
+    if (existingProxy) {
+        return existingProxy
+    }
+    const proxy = new Proxy<T>(target, baseHandlers)
+    proxyMap.set(target, proxy)
+    return proxy
 }
 
 export function isReactive(value: unknown): boolean {
@@ -57,4 +73,8 @@ export function isReadonly(value: unknown): boolean {
 }
 export function isProxy(value: unknown): boolean {
     return isReactive(value) || isReadonly(value)
+}
+export function toRaw<T>(value: T): T {
+    const raw = value && (value as Target)[ReactiveFlags.RAW]
+    return raw ? toRaw(raw) : value
 }

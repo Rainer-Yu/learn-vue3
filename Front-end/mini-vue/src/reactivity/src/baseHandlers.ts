@@ -1,6 +1,15 @@
 import { isObject } from '../../shared'
 import { track, trigger } from './effect'
-import { reactive, ReactiveFlags, readonly, Target } from './reactive'
+import {
+    reactive,
+    ReactiveFlags,
+    reactiveMap,
+    readonly,
+    readonlyMap,
+    shallowReactiveMap,
+    shallowReadonlyMap,
+    Target
+} from './reactive'
 
 type ReactiveGetter = <T extends object>(
     target: T & Target,
@@ -60,6 +69,19 @@ function createGetter(
             return !isReadonly
         } else if (key === ReactiveFlags.IS_READONLY) {
             return isReadonly
+        } else if (
+            key === ReactiveFlags.RAW &&
+            receiver ===
+                (isReadonly
+                    ? shallow
+                        ? shallowReadonlyMap
+                        : readonlyMap
+                    : shallow
+                    ? shallowReactiveMap
+                    : reactiveMap
+                ).get(target)
+        ) {
+            return target
         }
 
         const res = Reflect.get(target, key, receiver)
