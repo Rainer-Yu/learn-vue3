@@ -1,35 +1,46 @@
 import { isObject } from '../../shared'
 import { track, trigger } from './effect'
-import { reactive, ReactiveFlags, readonly } from './reactive'
+import { reactive, ReactiveFlags, readonly, Target } from './reactive'
 
-type ReactiveGetter = <T extends object>(target: T, key: string | symbol) => T
+type ReactiveGetter = <T extends object>(
+    target: T & Target,
+    key: PropertyKey,
+    receiver?: any
+) => T
 type ReactiveSetter = <T extends object>(
-    target: T,
-    key: string | symbol,
-    value: any
+    target: T & Target,
+    key: PropertyKey,
+    value: any,
+    receiver?: any
 ) => boolean
 
 const reactvieGet = createGetter()
 const reactvieSet = createSetter()
-const shallowReactiveGet = createGetter(false, true)
-const shallowReactiveSet = reactvieSet
-const readonlyGet = createGetter(true)
-const readonlySet = createSetter(true)
-const shallowReadonlyGet = createGetter(true, true)
-const shallowReadonlySet = readonlySet
-
+/** reactive 拦截方法 */
 export const reactiveHandlers: ProxyHandler<object> = {
     get: reactvieGet,
     set: reactvieSet
 }
+
+const shallowReactiveGet = createGetter(false, true)
+const shallowReactiveSet = reactvieSet
+/** shallowReactive 拦截方法 */
 export const shallowReactiveHandlers: ProxyHandler<object> = {
     get: shallowReactiveGet,
     set: shallowReactiveSet
 }
+
+const readonlyGet = createGetter(true)
+const readonlySet = readonlySetter
+/** readonly 拦截方法 */
 export const readonlyHandlers: ProxyHandler<object> = {
     get: readonlyGet,
     set: readonlySet
 }
+
+const shallowReadonlyGet = createGetter(true, true)
+const shallowReadonlySet = readonlySetter
+/** shallowReadonly 拦截方法 */
 export const shallowReadonlyHandlers: ProxyHandler<object> = {
     get: shallowReadonlyGet,
     set: shallowReadonlySet
@@ -43,7 +54,7 @@ function createGetter(
     isReadonly: boolean = false,
     shallow: boolean = false
 ): ReactiveGetter {
-    return (target, key) => {
+    return (target, key, receiver) => {
         // isReactive和isReadonly 检测 不是readonly的就是reactive
         if (key === ReactiveFlags.IS_REACTIVE) {
             return !isReadonly
@@ -51,7 +62,7 @@ function createGetter(
             return isReadonly
         }
 
-        const res = Reflect.get(target, key)
+        const res = Reflect.get(target, key, receiver)
 
         // 不执行嵌套对象的深度readonly转换
         if (shallow) {
@@ -72,26 +83,25 @@ function createGetter(
     }
 }
 /**
- * 创建proxy对象的set 方法
+ * 创建非readoly Proxy对象的 set 方法
  */
-function createSetter(isReadonly: boolean = false): ReactiveSetter {
-    if (isReadonly) {
-        // 如果是readonly创建的代理对象
-        // 触发 set 操作时控制台进行警告提示
-        return (target, key) => {
-            console.warn(
-                `Set operation on key "${String(key)}" failed: target is readonly.`,
-                target
-            )
-            return true
-        }
-    } else {
-        // 如果是reactive创建的代理对象 触发 set 操作时 触发依赖执行
-        return (target, key, value) => {
-            const res = Reflect.set(target, key, value)
-            // 触发依赖执行
-            trigger(target, key)
-            return res
-        }
+function createSetter(): ReactiveSetter {
+    // reactive创建的代理对象 触发 set 操作时 触发依赖执行
+    return (target, key, value, receiver) => {
+        const res = Reflect.set(target, key, value, receiver)
+        // 触发依赖执行
+        trigger(target, key)
+        return res
     }
+}
+/**
+ * readoly Proxy对象的 set 方法
+ */
+function readonlySetter<T extends object>(target: T, key: PropertyKey): boolean {
+    // readonly创建的代理对象, 触发 set 操作时控制台进行警告提示
+    console.warn(
+        `Set operation on key "${String(key)}" failed: target is readonly.`,
+        target
+    )
+    return true
 }

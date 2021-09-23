@@ -9,7 +9,7 @@ export const enum ReactiveFlags {
     IS_REACTIVE = '__v_isReactive',
     IS_READONLY = '__v_isReadonly'
 }
-type Target = {
+export type Target = {
     [ReactiveFlags.IS_REACTIVE]?: boolean
     [ReactiveFlags.IS_READONLY]?: boolean
 }
