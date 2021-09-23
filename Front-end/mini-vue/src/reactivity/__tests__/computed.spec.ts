@@ -1,12 +1,14 @@
 import { computed } from '../src/computed'
 import { effect } from '../src/effect'
-import { reactive } from '../src/reactive'
+import { isReadonly, reactive } from '../src/reactive'
+import { ref } from '../src/ref'
 
 describe('reactivity/computed', () => {
     it('should return updated value', () => {
         const reactiveObj = reactive<{ foo?: number }>({})
         const computedValue = computed(() => reactiveObj.foo)
 
+        expect(isReadonly(computedValue)).toBe(true)
         expect(computedValue.value).toBe(undefined)
         reactiveObj.foo = 1
         expect(computedValue.value).toBe(1)
@@ -50,5 +52,23 @@ describe('reactivity/computed', () => {
         expect(dummy).toBe(undefined)
         reactiveObj.foo = 1
         expect(dummy).toBe(1)
+    })
+
+    it('should support setter', () => {
+        const n = ref(1)
+        const plusOne = computed({
+            get: () => n.value + 1,
+            set: (val) => {
+                n.value = val - 1
+            }
+        })
+
+        expect(isReadonly(plusOne)).toBe(false)
+        expect(plusOne.value).toBe(2)
+        n.value++
+        expect(plusOne.value).toBe(3)
+
+        plusOne.value = 0
+        expect(n.value).toBe(-1)
     })
 })
