@@ -72,9 +72,12 @@ describe('effect', () => {
         })
         obj.prop = 2
         expect(dummy).toBe(2)
+
         stop(runner)
         obj.prop++
         expect(dummy).toBe(2)
+        // 不会重复stop 和 清空依赖
+        stop(runner)
 
         // stop掉的effect 应该仍然可以手动调用 runner
         runner()

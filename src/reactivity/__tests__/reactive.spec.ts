@@ -1,4 +1,12 @@
-import { reactive, isReactive, isProxy, toRaw } from '../src/reactive'
+import {
+    reactive,
+    isReactive,
+    isProxy,
+    toRaw,
+    readonly,
+    shallowReadonly,
+    shallowReactive
+} from '../src/reactive'
 describe('reactive', () => {
     it('happy path', () => {
         const original = { foo: 1 }
@@ -20,6 +28,8 @@ describe('reactive', () => {
             array: [{ bar: 2 }]
         }
         const observed = reactive(original)
+        // 此时没有track过依赖 没有触发trigger
+        observed.text = 'text'
         // 只有嵌套的对象被转换为 reactive
         expect(isReactive(observed.text)).toBe(false)
         expect(isReactive(observed.nested)).toBe(true)
@@ -28,9 +38,15 @@ describe('reactive', () => {
     })
 
     it('toRaw', () => {
-        const original = { foo: 1 }
-        const observed = reactive(original)
-        expect(toRaw(observed)).toBe(original)
-        expect(toRaw(original)).toBe(original)
+        const obj = { foo: { bar: 'bar' }, sum: 1 }
+        const reactiveObj = reactive(obj)
+        const shallowReactiveObj = shallowReactive(obj)
+        const readonlyObj = readonly(obj)
+        const shallowReadonlyObj = shallowReadonly(obj)
+        expect(toRaw(obj)).toBe(obj)
+        expect(toRaw(reactiveObj)).toBe(obj)
+        expect(toRaw(shallowReactiveObj)).toBe(obj)
+        expect(toRaw(readonlyObj)).toBe(obj)
+        expect(toRaw(shallowReadonlyObj)).toBe(obj)
     })
 })
