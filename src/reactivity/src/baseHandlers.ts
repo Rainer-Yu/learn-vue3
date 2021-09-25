@@ -2,7 +2,7 @@ import { isObject } from '../../shared/src'
 import { track, trigger } from './effect'
 import {
     reactive,
-    ReactiveFlags,
+    ReactivityFlags,
     reactiveMap,
     readonly,
     readonlyMap,
@@ -65,12 +65,12 @@ function createGetter(
 ): ReactiveGetter {
     return (target, key, receiver) => {
         // isReactive和isReadonly 检测 不是readonly的就是reactive
-        if (key === ReactiveFlags.IS_REACTIVE) {
+        if (key === ReactivityFlags.IS_REACTIVE) {
             return !isReadonly
-        } else if (key === ReactiveFlags.IS_READONLY) {
+        } else if (key === ReactivityFlags.IS_READONLY) {
             return isReadonly
         } else if (
-            key === ReactiveFlags.RAW &&
+            key === ReactivityFlags.RAW &&
             receiver ===
                 (isReadonly
                     ? shallow

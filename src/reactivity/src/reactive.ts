@@ -5,15 +5,16 @@ import {
     shallowReactiveHandlers
 } from './baseHandlers'
 
-export const enum ReactiveFlags {
+export const enum ReactivityFlags {
     IS_REACTIVE = '__v_isReactive',
+    IS_REF = '__v_isRef',
     IS_READONLY = '__v_isReadonly',
     RAW = '__v_raw'
 }
 export type Target = {
-    [ReactiveFlags.IS_REACTIVE]?: boolean
-    [ReactiveFlags.IS_READONLY]?: boolean
-    [ReactiveFlags.RAW]?: any
+    [ReactivityFlags.IS_REACTIVE]?: boolean
+    [ReactivityFlags.IS_READONLY]?: boolean
+    [ReactivityFlags.RAW]?: any
 }
 
 export type ProxyToRawWeakMap = WeakMap<Target, any>
@@ -66,15 +67,15 @@ function createReactiveObject<T extends object>(
 }
 
 export function isReactive(value: unknown): boolean {
-    return !!(value as Target)[ReactiveFlags.IS_REACTIVE]
+    return !!(value as Target)[ReactivityFlags.IS_REACTIVE]
 }
 export function isReadonly(value: unknown): boolean {
-    return !!(value as Target)[ReactiveFlags.IS_READONLY]
+    return !!(value as Target)[ReactivityFlags.IS_READONLY]
 }
 export function isProxy(value: unknown): boolean {
     return isReactive(value) || isReadonly(value)
 }
 export function toRaw<T>(value: T): T {
-    const raw = value && (value as Target)[ReactiveFlags.RAW]
+    const raw = value && (value as Target)[ReactivityFlags.RAW]
     return raw ? toRaw(raw) : value
 }

@@ -1,7 +1,7 @@
 import { hasChanged, isObject } from '../../shared/src'
 import { createDep, Dep } from './dep'
 import { isTracking, trackEffects, triggerEffects } from './effect'
-import { reactive } from './reactive'
+import { reactive, ReactivityFlags } from './reactive'
 
 type Ref<T = any> = {
     value: T
@@ -27,7 +27,7 @@ class RefImpl<T> {
     private _rawValue: T
     private _value: T
     public dep?: Dep = void 0 /* dep 只会在读取ref的值时才会进行初始化 */
-    public readonly __v_isRef: boolean = true /* ref类型标志 */
+    public readonly [ReactivityFlags.IS_REF]: boolean = true /* ref类型标志 */
 
     constructor(value: T) {
         // 如果传入的是一个对象,则用reactive将此对象代理成响应式
@@ -75,7 +75,7 @@ export function ref(raw?: unknown) {
 
 /** 检查变量是否为一个 ref 对象 */
 export const isRef = <T>(value: Ref<T> | unknown): value is Ref<T> =>
-    !!(value as any).__v_isRef === true
+    !!(value as any)[ReactivityFlags.IS_REF] === true
 
 /** 如果参数是一个 ref，则返回内部值，否则返回参数本身 */
 export const unref = <T>(ref: Ref<T> | T): T => (isRef(ref) ? ref.value : ref)
