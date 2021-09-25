@@ -7,8 +7,14 @@ describe('reactivity/computed', () => {
     it('should return updated value', () => {
         const reactiveObj = reactive<{ foo?: number }>({})
         const computedValue = computed(() => reactiveObj.foo)
+        console.warn = jest.fn()
 
+        // 默认情况下 computed 是只读的
         expect(isReadonly(computedValue)).toBe(true)
+        // @ts-ignore-nextline 对只读的computed赋值不会成功,并且会发出警告
+        computedValue.value = 1
+        expect(console.warn).toBeCalledTimes(1)
+
         expect(computedValue.value).toBe(undefined)
         reactiveObj.foo = 1
         expect(computedValue.value).toBe(1)
@@ -26,18 +32,19 @@ describe('reactivity/computed', () => {
         expect(getter).toHaveBeenCalledTimes(1)
 
         // computed 的依赖不改变时, 再次获取值时使用缓存的computed值
-        computedValue.value
+        expect(computedValue.value).toBe(undefined)
         expect(getter).toHaveBeenCalledTimes(1)
 
-        // should not compute until needed
+        // computed的依赖改变后,在被再次读取值之前不重新计算
+        reactiveObj.foo = 0
         reactiveObj.foo = 1
         expect(getter).toHaveBeenCalledTimes(1)
 
-        // now it should compute
+        // computed的依赖改变后,再次读取值时重新计算
         expect(computedValue.value).toBe(1)
         expect(getter).toHaveBeenCalledTimes(2)
 
-        // should not compute again
+        // computed 的依赖不改变时, 再次获取值时使用缓存的computed值,不会重新计算
         computedValue.value
         expect(getter).toHaveBeenCalledTimes(2)
     })
@@ -70,5 +77,21 @@ describe('reactivity/computed', () => {
 
         plusOne.value = 0
         expect(n.value).toBe(-1)
+    })
+    it('should not support setter when the configuration object only has getter', () => {
+        const n = ref(1)
+        // @ts-ignore-nextline
+        const plusOne = computed({ get: () => n.value + 1 })
+        console.warn = jest.fn()
+
+        expect(isReadonly(plusOne)).toBe(true)
+        expect(plusOne.value).toBe(2)
+        n.value++
+        expect(plusOne.value).toBe(3)
+
+        // @ts-ignore-nextline
+        plusOne.value = 0
+        expect(console.warn).toHaveBeenCalledTimes(1)
+        expect(n.value).toBe(2)
     })
 })
