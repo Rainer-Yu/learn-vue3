@@ -1,4 +1,4 @@
-import { isFunction } from '../../shared'
+import { isFunction } from '../../shared/src'
 import { Dep } from './dep'
 import { ReactiveEffect, triggerEffects } from './effect'
 import { ReactiveFlags } from './reactive'

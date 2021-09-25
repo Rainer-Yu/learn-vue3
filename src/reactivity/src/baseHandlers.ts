@@ -1,4 +1,4 @@
-import { isObject } from '../../shared'
+import { isObject } from '../../shared/src'
 import { track, trigger } from './effect'
 import {
     reactive,

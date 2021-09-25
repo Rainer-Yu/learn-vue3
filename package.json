@@ -5,6 +5,7 @@
     "license": "MIT",
     "scripts": {
         "test": "jest --runInBand",
+        "test-coverage": "jest --runInBand --coverage",
         "test-watchAll": "jest --runInBand --watchAll"
     },
     "devDependencies": {
@@ -14,6 +15,7 @@
         "@types/jest": "^27.0.1",
         "babel-jest": "^27.1.0",
         "jest": "^27.1.0",
+        "ts-node": "^10.2.1",
         "typescript": "^4.4.2"
     }
 }

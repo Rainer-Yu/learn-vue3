@@ -1,4 +1,4 @@
-import { hasChanged, isObject } from '../../shared'
+import { hasChanged, isObject } from '../../shared/src'
 import { createDep, Dep } from './dep'
 import { isTracking, trackEffects, triggerEffects } from './effect'
 import { reactive } from './reactive'
