@@ -1,12 +1,13 @@
 import { effect } from '../src/effect'
-import { isReactive } from '../src/reactive'
+import { isReactive, isReadonly } from '../src/reactive'
 import { isRef, proxyRefs, ref, unref } from '../src/ref'
 describe('reactivity/ref', () => {
     it('ref happy path', () => {
-        const a = ref(1)
-        expect(a.value).toBe(1)
-        a.value = 2
-        expect(a.value).toBe(2)
+        const r = ref(1)
+        expect(isReadonly(r)).toBe(false)
+        expect(r.value).toBe(1)
+        r.value = 2
+        expect(r.value).toBe(2)
     })
     // ref() 没有初始值时也能正常工作
     it('should work without initial value', () => {

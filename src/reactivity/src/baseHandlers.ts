@@ -2,7 +2,6 @@ import { isObject } from '../../shared/src'
 import { track, trigger } from './effect'
 import {
     reactive,
-    ReactivityFlags,
     reactiveMap,
     readonly,
     readonlyMap,
@@ -10,6 +9,8 @@ import {
     shallowReadonlyMap,
     Target
 } from './reactive'
+import { ReactivityFlags } from './enumeration'
+import { isRef, unref } from './ref'
 
 type ReactiveGetter = <T extends object>(
     target: T & Target,
@@ -53,6 +54,19 @@ const shallowReadonlySet = readonlySetter
 export const shallowReadonlyHandlers: ProxyHandler<object> = {
     get: shallowReadonlyGet,
     set: shallowReadonlySet
+}
+
+export const shallowUnwrapRefHandlers: ProxyHandler<any> = {
+    get: (target, key, receiver) => unref(Reflect.get(target, key, receiver)),
+    set: (target, key, newValue, receiver) => {
+        const oldValue = Reflect.get(target, key, receiver)
+        if (isRef(oldValue) && !isRef(newValue)) {
+            oldValue.value = newValue
+            return true
+        } else {
+            return Reflect.set(target, key, newValue, receiver)
+        }
+    }
 }
 
 /**

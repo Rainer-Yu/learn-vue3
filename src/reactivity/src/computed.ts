@@ -1,7 +1,7 @@
 import { isFunction } from '../../shared/src'
 import { Dep } from './dep'
 import { ReactiveEffect, triggerEffects } from './effect'
-import { ReactivityFlags } from './reactive'
+import { ReactivityFlags } from './enumeration'
 import { trackRefValue } from './ref'
 
 type ComputedGetter<T> = (...args: any[]) => T

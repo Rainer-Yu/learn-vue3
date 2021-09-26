@@ -1,7 +1,9 @@
 import { hasChanged, isObject } from '../../shared/src'
+import { shallowUnwrapRefHandlers } from './baseHandlers'
 import { createDep, Dep } from './dep'
 import { isTracking, trackEffects, triggerEffects } from './effect'
-import { reactive, ReactivityFlags } from './reactive'
+import { reactive } from './reactive'
+import { ReactivityFlags } from './enumeration'
 
 type Ref<T = any> = {
     value: T
@@ -28,6 +30,7 @@ class RefImpl<T> {
     private _value: T
     public dep?: Dep = void 0 /* dep 只会在读取ref的值时才会进行初始化 */
     public readonly [ReactivityFlags.IS_REF]: boolean = true /* ref类型标志 */
+    public readonly [ReactivityFlags.IS_READONLY]: boolean = false /* 是否只读标志 */
 
     constructor(value: T) {
         // 如果传入的是一个对象,则用reactive将此对象代理成响应式
@@ -83,17 +86,4 @@ export const unref = <T>(ref: Ref<T> | T): T => (isRef(ref) ? ref.value : ref)
 /** proxyRefs 对 object对象中的 ref 进行浅解包 */
 export function proxyRefs<T extends object>(objectWithRefs: T): ShallowUnwrapRef<T> {
     return new Proxy(objectWithRefs, shallowUnwrapRefHandlers)
-}
-
-const shallowUnwrapRefHandlers: ProxyHandler<any> = {
-    get: (target, key, receiver) => unref(Reflect.get(target, key, receiver)),
-    set: (target, key, newValue, receiver) => {
-        const oldValue = Reflect.get(target, key, receiver)
-        if (isRef(oldValue) && !isRef(newValue)) {
-            oldValue.value = newValue
-            return true
-        } else {
-            return Reflect.set(target, key, newValue, receiver)
-        }
-    }
 }

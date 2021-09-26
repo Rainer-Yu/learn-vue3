@@ -4,13 +4,8 @@ import {
     shallowReadonlyHandlers,
     shallowReactiveHandlers
 } from './baseHandlers'
+import { ReactivityFlags } from './enumeration'
 
-export const enum ReactivityFlags {
-    IS_REACTIVE = '__v_isReactive',
-    IS_REF = '__v_isRef',
-    IS_READONLY = '__v_isReadonly',
-    RAW = '__v_raw'
-}
 export type Target = {
     [ReactivityFlags.IS_REACTIVE]?: boolean
     [ReactivityFlags.IS_READONLY]?: boolean
