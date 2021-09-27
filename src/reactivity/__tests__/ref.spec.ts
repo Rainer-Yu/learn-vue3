@@ -1,6 +1,6 @@
 import { effect } from '../src/effect'
 import { isReactive, isReadonly, reactive } from '../src/reactive'
-import { isRef, proxyRefs, ref, shallowRef, unref } from '../src/ref'
+import { isRef, proxyRefs, ref, shallowRef, toRef, unref } from '../src/ref'
 describe('reactivity/ref', () => {
     it('ref happy path', () => {
         const r = ref(1)
@@ -126,5 +126,42 @@ describe('reactivity/ref', () => {
         // force trigger
         // triggerRef(sref)
         // expect(dummy).toBe(2)
+    })
+
+    it('toRef', () => {
+        const a = reactive({
+            x: 1
+        })
+        const x = toRef(a, 'x')
+        expect(isRef(x)).toBe(true)
+        expect(x.value).toBe(1)
+
+        // source -> proxy
+        a.x = 2
+        expect(x.value).toBe(2)
+
+        // proxy -> source
+        x.value = 3
+        expect(a.x).toBe(3)
+
+        // reactivity
+        let dummyX
+        effect(() => {
+            dummyX = x.value
+        })
+        expect(dummyX).toBe(x.value)
+
+        // mutating source should trigger effect using the proxy refs
+        a.x = 4
+        expect(dummyX).toBe(4)
+
+        // should keep ref
+        const r = { x: ref(1) }
+        const rr = toRef(r, 'x')
+        expect(rr).toBe(r.x)
+        rr.value = 2
+        expect(r.x.value).toBe(2)
+        r.x.value = 3
+        expect(rr.value).toBe(3)
     })
 })

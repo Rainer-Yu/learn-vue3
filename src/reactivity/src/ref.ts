@@ -24,6 +24,26 @@ export type ShallowUnwrapRef<T> = {
         : T[K]
 }
 
+// REVIEW
+export type UnwrapRef<T> = T extends Ref<infer V>
+    ? UnwrapRefSimple<V>
+    : UnwrapRefSimple<T>
+// REVIEW
+export type UnwrapRefSimple<T> = T extends
+    | Function
+    //   | CollectionTypes
+    //   | BaseTypes
+    | Ref
+    ? //   | RefUnwrapBailTypes[keyof RefUnwrapBailTypes]
+      T
+    : T extends Array<any>
+    ? { [K in keyof T]: UnwrapRefSimple<T[K]> }
+    : T extends object
+    ? {
+          [P in keyof T]: P extends symbol ? T[P] : UnwrapRef<T[P]>
+      }
+    : T
+
 // Ref实现类
 class RefImpl<T> {
     private _rawValue: T
@@ -63,6 +83,20 @@ export function trackRefValue(ref: RefBase<any>) {
     trackEffects(ref.dep)
 }
 
+/** REVIEW 为源响应式对象上的某个 property 新创建一个 ref */
+class ObjectRefImpl<T extends object, K extends keyof T> {
+    public readonly [ReactivityFlags.IS_REF]: boolean = true
+
+    constructor(private readonly _rawObject: T, private readonly _key: K) {}
+
+    get value() {
+        return this._rawObject[this._key]
+    }
+    set value(newVal) {
+        this._rawObject[this._key] = newVal
+    }
+}
+
 /**
  * 创建一个 Ref 变量
  */ /* TS重载 */
@@ -89,6 +123,16 @@ export const isRef = <T>(value: Ref<T> | unknown): value is Ref<T> =>
 
 /** 如果参数是一个 ref，则返回内部值，否则返回参数本身 */
 export const unref = <T>(ref: Ref<T> | T): T => (isRef(ref) ? ref.value : ref)
+
+/** REVIEW toRef 为源响应式对象上的某个 property 新创建一个 ref(是ref的直接返回) */
+export type ToRef<T> = [T] extends [Ref] ? T : Ref<UnwrapRef<T>>
+export const toRef = <T extends object, K extends keyof T>(
+    rawObject: T,
+    key: K
+): ToRef<T[K]> => {
+    const val = rawObject[key]
+    return isRef(val) ? val : (new ObjectRefImpl(rawObject, key) as any)
+}
 
 /** proxyRefs 对 object对象中的 ref 进行浅解包 */
 export function proxyRefs<T extends object>(objectWithRefs: T): ShallowUnwrapRef<T> {
