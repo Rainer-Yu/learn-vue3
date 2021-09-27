@@ -1,8 +1,8 @@
-import { hasChanged } from '../../shared/src'
+import { hasChanged, isArray } from '../../shared/src'
 import { shallowUnwrapRefHandlers } from './baseHandlers'
 import { createDep, Dep } from './dep'
 import { isTracking, trackEffects, triggerEffects } from './effect'
-import { toReactive } from './reactive'
+import { isProxy, toReactive } from './reactive'
 import { ReactivityFlags } from './enumeration'
 
 type Ref<T = any> = {
@@ -132,6 +132,21 @@ export const toRef = <T extends object, K extends keyof T>(
 ): ToRef<T[K]> => {
     const val = rawObject[key]
     return isRef(val) ? val : (new ObjectRefImpl(rawObject, key) as any)
+}
+
+/** REVIEW toRefs */
+export type ToRefs<T = any> = {
+    [K in keyof T]: T[K] extends Ref ? T[K] : Ref<UnwrapRef<T[K]>>
+}
+export function toRefs<T extends object>(object: T): ToRefs<T> {
+    if (!isProxy(object)) {
+        console.warn(`toRefs() expects a reactive object but received a plain one.`)
+    }
+    const ret: any = isArray(object) ? new Array(object.length) : {}
+    for (const key in object) {
+        ret[key] = toRef(object, key)
+    }
+    return ret
 }
 
 /** proxyRefs 对 object对象中的 ref 进行浅解包 */

@@ -1,6 +1,6 @@
 import { effect } from '../src/effect'
 import { isReactive, isReadonly, reactive } from '../src/reactive'
-import { isRef, proxyRefs, ref, shallowRef, toRef, unref } from '../src/ref'
+import { isRef, proxyRefs, ref, shallowRef, toRef, toRefs, unref } from '../src/ref'
 describe('reactivity/ref', () => {
     it('ref happy path', () => {
         const r = ref(1)
@@ -163,5 +163,71 @@ describe('reactivity/ref', () => {
         expect(r.x.value).toBe(2)
         r.x.value = 3
         expect(rr.value).toBe(3)
+    })
+
+    it('toRefs', () => {
+        const a = reactive({
+            x: 1,
+            y: 2
+        })
+
+        const { x, y } = toRefs(a)
+
+        expect(isRef(x)).toBe(true)
+        expect(isRef(y)).toBe(true)
+        expect(x.value).toBe(1)
+        expect(y.value).toBe(2)
+
+        // source -> proxy
+        a.x = 2
+        a.y = 3
+        expect(x.value).toBe(2)
+        expect(y.value).toBe(3)
+
+        // proxy -> source
+        x.value = 3
+        y.value = 4
+        expect(a.x).toBe(3)
+        expect(a.y).toBe(4)
+
+        // reactivity
+        let dummyX, dummyY
+        effect(() => {
+            dummyX = x.value
+            dummyY = y.value
+        })
+        expect(dummyX).toBe(x.value)
+        expect(dummyY).toBe(y.value)
+
+        // mutating source should trigger effect using the proxy refs
+        a.x = 4
+        a.y = 5
+        expect(dummyX).toBe(4)
+        expect(dummyY).toBe(5)
+    })
+
+    it('toRefs should warn on plain object', () => {
+        console.warn = jest.fn()
+        toRefs({})
+        expect(console.warn).toHaveBeenCalledTimes(1)
+    })
+
+    it('toRefs should warn on plain array', () => {
+        console.warn = jest.fn()
+        toRefs([])
+        expect(console.warn).toHaveBeenCalledTimes(1)
+    })
+
+    it('toRefs reactive array', () => {
+        const arr = reactive(['a', 'b', 'c'])
+        const refs = toRefs(arr)
+
+        expect(Array.isArray(refs)).toBe(true)
+
+        refs[0].value = '1'
+        expect(arr[0]).toBe('1')
+
+        arr[1] = '2'
+        expect(refs[1].value).toBe('2')
     })
 })
