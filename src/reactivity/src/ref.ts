@@ -1,8 +1,8 @@
-import { hasChanged, isObject } from '../../shared/src'
+import { hasChanged } from '../../shared/src'
 import { shallowUnwrapRefHandlers } from './baseHandlers'
 import { createDep, Dep } from './dep'
 import { isTracking, trackEffects, triggerEffects } from './effect'
-import { reactive } from './reactive'
+import { toReactive } from './reactive'
 import { ReactivityFlags } from './enumeration'
 
 type Ref<T = any> = {
@@ -32,10 +32,10 @@ class RefImpl<T> {
     public readonly [ReactivityFlags.IS_REF]: boolean = true /* ref类型标志 */
     public readonly [ReactivityFlags.IS_READONLY]: boolean = false /* 是否只读标志 */
 
-    constructor(value: T) {
+    constructor(value: T, private readonly _shallow: boolean) {
         // 如果传入的是一个对象,则用reactive将此对象代理成响应式
         this._rawValue = value
-        this._value = convertObjectToReactive(value)
+        this._value = _shallow ? value : toReactive(value)
     }
     get value() {
         trackRefValue(this)
@@ -47,14 +47,11 @@ class RefImpl<T> {
             // 先修改value,再触发依赖
             this._rawValue = newValue
             // 如果传入的是一个对象,则用reactive将此对象代理成响应式
-            this._value = convertObjectToReactive(newValue)
+            this._value = this._shallow ? newValue : toReactive(newValue)
             this.dep && triggerEffects(this.dep)
         }
     }
 }
-/** 将对象类型的ref.value用reactive代理 */
-const convertObjectToReactive = <T extends unknown>(value: T): T =>
-    isObject(value) ? reactive(value) : value
 
 /** 收集ref的依赖 */
 export function trackRefValue(ref: RefBase<any>) {
@@ -76,9 +73,15 @@ export function ref(raw?: unknown) {
     return createRef(raw)
 }
 
-function createRef(rawValue: unknown) {
-    return isRef(rawValue) ? rawValue : new RefImpl(rawValue)
+export function shallowRef<T extends object>(value: T): T extends Ref ? T : Ref<T>
+export function shallowRef<T>(value: T): Ref<T>
+export function shallowRef<T = any>(): Ref<T | undefined>
+export function shallowRef(raw?: unknown) {
+    return createRef(raw, true)
 }
+
+const createRef = (rawValue: unknown, shallow: boolean = false) =>
+    isRef(rawValue) ? rawValue : new RefImpl(rawValue, shallow)
 
 /** 检查变量是否为一个 ref 对象 */
 export const isRef = <T>(value: Ref<T> | unknown): value is Ref<T> =>

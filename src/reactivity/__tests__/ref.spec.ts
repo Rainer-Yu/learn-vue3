@@ -1,6 +1,6 @@
 import { effect } from '../src/effect'
-import { isReactive, isReadonly } from '../src/reactive'
-import { isRef, proxyRefs, ref, unref } from '../src/ref'
+import { isReactive, isReadonly, reactive } from '../src/reactive'
+import { isRef, proxyRefs, ref, shallowRef, unref } from '../src/ref'
 describe('reactivity/ref', () => {
     it('ref happy path', () => {
         const r = ref(1)
@@ -90,40 +90,41 @@ describe('reactivity/ref', () => {
         expect(proxyUser.age).toBe(10)
         expect(user.age.value).toBe(10)
     })
-    it.skip('toRef', () => {
-        const a = reactive({
-            x: 1
-        })
-        const x = toRef(a, 'x')
-        expect(isRef(x)).toBe(true)
-        expect(x.value).toBe(1)
 
-        // source -> proxy
-        a.x = 2
-        expect(x.value).toBe(2)
+    it('shallowRef', () => {
+        const sref = shallowRef({ a: 1 })
+        expect(isReactive(sref.value)).toBe(false)
 
-        // proxy -> source
-        x.value = 3
-        expect(a.x).toBe(3)
-
-        // reactivity
-        let dummyX
+        let dummy
         effect(() => {
-            dummyX = x.value
+            dummy = sref.value.a
         })
-        expect(dummyX).toBe(x.value)
+        expect(dummy).toBe(1)
 
-        // mutating source should trigger effect using the proxy refs
-        a.x = 4
-        expect(dummyX).toBe(4)
+        sref.value = { a: 2 }
+        expect(isReactive(sref.value)).toBe(false)
+        expect(dummy).toBe(2)
+    })
+    it('should return the ref  when the shallowRef wraps a ref', () => {
+        const r = ref({ num: 1 })
+        const sr = shallowRef(r)
+        expect(sr).toBe(r)
+        expect(isReactive(sr.value)).toBe(true)
+    })
 
-        // should keep ref
-        const r = { x: ref(1) }
-        const rr = toRef(r, 'x')
-        expect(rr).toBe(r.x)
-        rr.value = 2
-        expect(r.x.value).toBe(2)
-        r.x.value = 3
-        expect(rr.value).toBe(3)
+    it('shallowRef force trigger', () => {
+        const sref = shallowRef({ a: 1 })
+        let dummy
+        effect(() => {
+            dummy = sref.value.a
+        })
+        expect(dummy).toBe(1)
+
+        sref.value.a = 2
+        expect(dummy).toBe(1) // should not trigger yet
+
+        // force trigger
+        // triggerRef(sref)
+        // expect(dummy).toBe(2)
     })
 })
