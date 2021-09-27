@@ -73,12 +73,16 @@ export function ref<T extends object>(raw: T): Ref<T>
 export function ref<T>(raw: T): Ref<T>
 export function ref<T = any>(): Ref<T | undefined>
 export function ref(raw?: unknown) {
-    return new RefImpl(raw)
+    return createRef(raw)
+}
+
+function createRef(rawValue: unknown) {
+    return isRef(rawValue) ? rawValue : new RefImpl(rawValue)
 }
 
 /** 检查变量是否为一个 ref 对象 */
 export const isRef = <T>(value: Ref<T> | unknown): value is Ref<T> =>
-    !!(value as any)[ReactivityFlags.IS_REF] === true
+    !!(value && (value as any)[ReactivityFlags.IS_REF] === true)
 
 /** 如果参数是一个 ref，则返回内部值，否则返回参数本身 */
 export const unref = <T>(ref: Ref<T> | T): T => (isRef(ref) ? ref.value : ref)

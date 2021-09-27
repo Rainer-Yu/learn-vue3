@@ -80,14 +80,50 @@ describe('reactivity/ref', () => {
         expect(user.age.value).toBe(10)
         expect(proxyUser.age).toBe(10)
         expect(proxyUser.name).toBe('xiaohong')
-        // TODO 把 Ref<T> 类型 转换为 T
-        proxyUser.age = 20
 
+        proxyUser.age = 20
         expect(proxyUser.age).toBe(20)
         expect(user.age.value).toBe(20)
+
         // @ts-ignore
         proxyUser.age = ref(10)
         expect(proxyUser.age).toBe(10)
         expect(user.age.value).toBe(10)
+    })
+    it.skip('toRef', () => {
+        const a = reactive({
+            x: 1
+        })
+        const x = toRef(a, 'x')
+        expect(isRef(x)).toBe(true)
+        expect(x.value).toBe(1)
+
+        // source -> proxy
+        a.x = 2
+        expect(x.value).toBe(2)
+
+        // proxy -> source
+        x.value = 3
+        expect(a.x).toBe(3)
+
+        // reactivity
+        let dummyX
+        effect(() => {
+            dummyX = x.value
+        })
+        expect(dummyX).toBe(x.value)
+
+        // mutating source should trigger effect using the proxy refs
+        a.x = 4
+        expect(dummyX).toBe(4)
+
+        // should keep ref
+        const r = { x: ref(1) }
+        const rr = toRef(r, 'x')
+        expect(rr).toBe(r.x)
+        rr.value = 2
+        expect(r.x.value).toBe(2)
+        r.x.value = 3
+        expect(rr.value).toBe(3)
     })
 })

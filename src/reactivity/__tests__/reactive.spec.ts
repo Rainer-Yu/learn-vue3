@@ -5,7 +5,10 @@ import {
     toRaw,
     readonly,
     shallowReadonly,
-    shallowReactive
+    shallowReactive,
+    toReactive,
+    isReadonly,
+    toReadonly
 } from '../src/reactive'
 describe('reactive', () => {
     it('happy path', () => {
@@ -48,5 +51,29 @@ describe('reactive', () => {
         expect(toRaw(shallowReactiveObj)).toBe(obj)
         expect(toRaw(readonlyObj)).toBe(obj)
         expect(toRaw(shallowReadonlyObj)).toBe(obj)
+    })
+
+    it('toReactive', () => {
+        const obj = { num: 5 }
+        const str = 'text'
+        // 非对象数据返回其本身
+        expect(toReactive(str)).toBe(str)
+        expect(isReactive(toReactive(str))).toBe(false)
+        // 返回对象的响应式副本
+        expect(toReactive(obj)).not.toBe(obj)
+        expect(isReactive(toReactive(obj))).toBe(true)
+        expect(isReadonly(toReactive(obj))).toBe(false)
+    })
+
+    it('toReadonly', () => {
+        const obj = { num: 5 }
+        const str = 'text'
+        // 非对象数据返回其本身
+        expect(toReadonly(str)).toBe(str)
+        expect(isReadonly(toReadonly(str))).toBe(false)
+        // 返回对象的响应式副本
+        expect(toReadonly(obj)).not.toBe(obj)
+        expect(isReadonly(toReadonly(obj))).toBe(true)
+        expect(isReactive(toReadonly(obj))).toBe(false)
     })
 })

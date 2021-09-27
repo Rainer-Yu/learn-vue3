@@ -1,3 +1,4 @@
+import { isObject } from '../../shared/src'
 import {
     reactiveHandlers,
     readonlyHandlers,
@@ -70,6 +71,14 @@ export function isReadonly(value: unknown): boolean {
 export function isProxy(value: unknown): boolean {
     return isReactive(value) || isReadonly(value)
 }
+
+/** 将对象类型的值用reactive代理 */
+export const toReactive = <T extends unknown>(value: T): T =>
+    isObject(value) ? reactive(value) : value
+/** 将对象类型的值用readonly代理 */
+export const toReadonly = <T extends unknown>(value: T): T =>
+    isObject(value) ? readonly(value) : value
+
 export function toRaw<T>(value: T): T {
     const raw = value && (value as Target)[ReactivityFlags.RAW]
     return raw ? toRaw(raw) : value
