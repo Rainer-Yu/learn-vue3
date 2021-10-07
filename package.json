@@ -1,9 +1,11 @@
 {
     "name": "mini-vue",
     "version": "1.0.0",
-    "main": "index.js",
+    "main": "lib/mini-vue3.cjs.js",
+    "module": "lib/mini-vue3.esm.js",
     "license": "MIT",
     "scripts": {
+        "build": "rollup -c rollup.config.js",
         "test": "jest --runInBand",
         "test-coverage": "jest --runInBand --coverage",
         "test-watchAll": "jest --runInBand --watchAll"
@@ -12,10 +14,13 @@
         "@babel/core": "^7.15.5",
         "@babel/preset-env": "^7.15.4",
         "@babel/preset-typescript": "^7.15.0",
+        "@rollup/plugin-typescript": "^8.2.5",
         "@types/jest": "^27.0.1",
         "babel-jest": "^27.1.0",
         "jest": "^27.1.0",
+        "rollup": "^2.58.0",
         "ts-node": "^10.2.1",
+        "tslib": "^2.3.1",
         "typescript": "^4.4.2"
     }
 }

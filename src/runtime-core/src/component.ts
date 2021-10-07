@@ -1,4 +1,4 @@
-import { EMPTY_OBJ, isObject } from '../../shared/src'
+import { EMPTY_OBJ, isObject } from '../../shared/index'
 
 type VNode = any
 export type Data = Record<string, unknown>

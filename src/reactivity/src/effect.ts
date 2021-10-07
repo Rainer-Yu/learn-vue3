@@ -1,4 +1,4 @@
-import { extend } from '../../shared/src'
+import { extend } from '../../shared/index'
 import { Dep } from './dep'
 /**
  * TS 类型

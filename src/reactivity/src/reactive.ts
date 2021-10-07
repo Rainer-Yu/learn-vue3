@@ -1,4 +1,4 @@
-import { isObject } from '../../shared/src'
+import { isObject } from '../../shared/index'
 import {
     reactiveHandlers,
     readonlyHandlers,

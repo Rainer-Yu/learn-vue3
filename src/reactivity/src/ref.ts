@@ -1,4 +1,4 @@
-import { hasChanged, isArray } from '../../shared/src'
+import { hasChanged, isArray } from '../../shared/index'
 import { shallowUnwrapRefHandlers } from './baseHandlers'
 import { createDep, Dep } from './dep'
 import { isTracking, trackEffects, triggerEffects } from './effect'

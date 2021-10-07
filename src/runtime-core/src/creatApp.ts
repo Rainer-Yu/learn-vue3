@@ -1,4 +1,5 @@
-import { createVNode } from './vNode'
+import { render } from './renderer'
+import { createVNode } from './vnode'
 
 /**  */
 export function createApp(rootComponent: any) {
@@ -7,6 +8,8 @@ export function createApp(rootComponent: any) {
             // 先把组件转化成虚拟节点 component -> VNode
             // 所有逻辑操作都会基于 VNode 做处理
             const vnode = createVNode(rootComponent)
+
+            render(vnode, rootContainer)
         }
     }
 }
