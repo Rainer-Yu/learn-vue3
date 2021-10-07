@@ -6,6 +6,7 @@
     "license": "MIT",
     "scripts": {
         "build": "rollup -c rollup.config.js",
+        "build-watch": "rollup -c rollup.config.js --watch",
         "test": "jest --runInBand",
         "test-coverage": "jest --runInBand --coverage",
         "test-watchAll": "jest --runInBand --watchAll"

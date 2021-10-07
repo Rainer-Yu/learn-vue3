@@ -10,9 +10,11 @@ export function render(vnode: any, container: any) {
     patch(vnode, container)
 }
 
-/**  */
+/** 处理各种vnode */
 function patch(vnode: any, container: any) {
-    // 处理组件
+    // TODO 处理Element类型的vnode
+    // processElement()
+    // 处理组件vnode
     processComponent(vnode, container)
 }
 

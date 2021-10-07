@@ -2,6 +2,7 @@ import { EMPTY_OBJ, isObject } from '../../shared/index'
 
 type VNode = any
 export type Data = Record<string, unknown>
+
 // 组件实例对象接口
 export interface ComponentInternalInstance {
     vnode: VNode
@@ -34,6 +35,7 @@ export function createComponentInstance(vnode: any): ComponentInternalInstance {
         setupState: EMPTY_OBJ
     }
 }
+
 /** 初始化组件 */
 export function setupComponent(instance: ComponentInternalInstance) {
     // TODO
@@ -66,9 +68,10 @@ function handleSetupResult(
 
     finishComponentSetup(instance)
 }
+
+/** 组件初始化 完成 */
 function finishComponentSetup(instance: any) {
     const Component = instance.type
-    if (!Component.render) {
-        Component.render = instance.render
-    }
+
+    instance.render = Component.render
 }
