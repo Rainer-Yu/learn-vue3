@@ -6,6 +6,16 @@ export const App = {
         }
     },
     render() {
-        return h('div', `hi,${this.msg}`)
+        return h(
+            'div',
+            {
+                class: ['bold'],
+                id: 'root'
+            },
+            [
+                h('span', { class: 'red' }, 'hi '),
+                h('span', { class: 'blue' }, 'mini-vue3')
+            ]
+        )
     }
 }
