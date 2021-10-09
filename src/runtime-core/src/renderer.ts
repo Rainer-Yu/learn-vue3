@@ -49,7 +49,7 @@ const mountElement = (vnode: any, container: Element) => {
 }
 /** 挂载子节点 */
 const mountChildren = (vnodeArray: any[], container: any) =>
-    vnodeArray.forEach((v) => patch(v, container))
+    vnodeArray.forEach((vnode) => patch(vnode, container))
 /** 挂载组件 */
 const mountComponent = (vnode: any, container: any) => {
     const instance = createComponentInstance(vnode)
@@ -58,6 +58,6 @@ const mountComponent = (vnode: any, container: any) => {
 }
 
 function setupRenderEffect(instance: ComponentInternalInstance, container: any) {
-    const subTree = instance.render()
+    const subTree = instance.render.call(instance.proxy)
     patch(subTree, container)
 }

@@ -13,7 +13,6 @@ export interface ComponentInternalInstance {
      */
     render: any | null
     /**
-     *
      * 此组件vdom树的 根vnode(虚拟节点)
      */
     subTree: VNode
@@ -22,6 +21,10 @@ export interface ComponentInternalInstance {
      * @internal
      */
     setupState: Data
+    /**
+     * proxy
+     */
+    proxy: any
 }
 
 /** 创建组件实例 */
@@ -32,7 +35,8 @@ export function createComponentInstance(vnode: any): ComponentInternalInstance {
         type,
         render: null,
         subTree: null!,
-        setupState: EMPTY_OBJ
+        setupState: EMPTY_OBJ,
+        proxy: null
     }
 }
 
@@ -47,6 +51,20 @@ export function setupComponent(instance: ComponentInternalInstance) {
 /** 初始化 有状态的(非函数式)组件 */
 function setupStatefulComponent(instance: ComponentInternalInstance) {
     const component = instance.type
+
+    // context
+    instance.proxy = new Proxy(
+        {},
+        {
+            get(target, key: string, receiver) {
+                const { setupState } = instance
+                if (key in setupState) {
+                    return setupState[key]
+                }
+            }
+        }
+    )
+
     const { setup } = component
     if (setup) {
         const setupResult = setup()

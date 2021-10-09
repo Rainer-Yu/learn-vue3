@@ -14,7 +14,7 @@ export const App = {
             },
             [
                 h('span', { class: 'red' }, 'hi '),
-                h('span', { class: 'blue' }, 'mini-vue3')
+                h('span', { class: 'blue' }, `"${this.msg}"`)
             ]
         )
     }
