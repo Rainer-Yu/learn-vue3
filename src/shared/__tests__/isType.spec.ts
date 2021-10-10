@@ -9,9 +9,9 @@ import {
     isSet,
     isString,
     isSymbol
-} from '../src/typesJudgment'
+} from '../src/isType'
 
-describe('shared/typesJudgment', () => {
+describe('shared/isType', () => {
     const str = 'string'
     const num = 1
     const bool = false
