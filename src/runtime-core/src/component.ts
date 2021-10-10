@@ -1,8 +1,16 @@
-import { EMPTY_OBJ, isObject } from '../../shared/index'
+import { EMPTY_OBJ, hasOwn, isObject } from '../../shared/index'
+import { publicInstanceProxyHandlers } from './componentPublicInstance'
+import { VNode, VNodeChildren } from './vnode'
 
-type VNode = any
+export type Component = any
 export type Data = Record<string, unknown>
 
+/**
+ * @internal
+ */
+export type InternalRenderFunction = {
+    (): VNodeChildren
+}
 // 组件实例对象接口
 export interface ComponentInternalInstance {
     vnode: VNode
@@ -11,7 +19,7 @@ export interface ComponentInternalInstance {
      * 返回vdom树的渲染函数
      * @internal
      */
-    render: any | null
+    render: InternalRenderFunction | null
     /**
      * 此组件vdom树的 根vnode(虚拟节点)
      */
@@ -25,19 +33,27 @@ export interface ComponentInternalInstance {
      * proxy
      */
     proxy: any
+    /**
+     * ctx
+     */
+    ctx: Data
 }
 
 /** 创建组件实例 */
-export function createComponentInstance(vnode: any): ComponentInternalInstance {
+export function createComponentInstance(vnode: VNode): ComponentInternalInstance {
     const type = vnode.type
-    return {
+    const instance = {
         vnode,
         type,
         render: null,
         subTree: null!,
         setupState: EMPTY_OBJ,
-        proxy: null
+        proxy: null,
+        ctx: EMPTY_OBJ
     }
+    instance.ctx = { _: instance }
+
+    return instance
 }
 
 /** 初始化组件 */
@@ -53,17 +69,7 @@ function setupStatefulComponent(instance: ComponentInternalInstance) {
     const component = instance.type
 
     // context
-    instance.proxy = new Proxy(
-        {},
-        {
-            get(target, key: string, receiver) {
-                const { setupState } = instance
-                if (key in setupState) {
-                    return setupState[key]
-                }
-            }
-        }
-    )
+    instance.proxy = new Proxy({ _: instance }, publicInstanceProxyHandlers)
 
     const { setup } = component
     if (setup) {

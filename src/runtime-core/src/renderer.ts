@@ -4,15 +4,16 @@ import {
     createComponentInstance,
     setupComponent
 } from './component'
+import { VNode, VNodeArrayChildren } from './vnode'
 
 /**  */
-export function render(vnode: any, container: any) {
+export function render(vnode: VNode, container: any) {
     // 调用 patch 方法
     patch(vnode, container)
 }
 
 /** 处理各种vnode */
-function patch(vnode: any, container: any) {
+function patch(vnode: VNode, container: any) {
     if (isString(vnode.type)) {
         // 处理Element类型的vnode
         processElement(vnode, container)
@@ -23,14 +24,15 @@ function patch(vnode: any, container: any) {
 }
 
 /** 处理Element */
-const processElement = (vnode: any, container: any) => mountElement(vnode, container)
+const processElement = (vnode: VNode, container: any) =>
+    mountElement(vnode, container)
 /** 处理组件 */
-const processComponent = (vnode: any, container: any) =>
+const processComponent = (vnode: VNode, container: any) =>
     mountComponent(vnode, container)
 
 /** 挂载Element */
-const mountElement = (vnode: any, container: Element) => {
-    const el: Element = document.createElement(vnode.type)
+const mountElement = (vnode: VNode, container: Element) => {
+    const el: Element = (vnode.el = document.createElement(vnode.type))
 
     const { children, props } = vnode
     // 处理 props
@@ -48,16 +50,21 @@ const mountElement = (vnode: any, container: Element) => {
     container.append(el)
 }
 /** 挂载子节点 */
-const mountChildren = (vnodeArray: any[], container: any) =>
-    vnodeArray.forEach((vnode) => patch(vnode, container))
+const mountChildren = (vnodeArray: VNodeArrayChildren, container: any) =>
+    vnodeArray.forEach((vnode) => patch(vnode as VNode, container))
 /** 挂载组件 */
-const mountComponent = (vnode: any, container: any) => {
-    const instance = createComponentInstance(vnode)
+const mountComponent = (initialVNode: VNode, container: any) => {
+    const instance = createComponentInstance(initialVNode)
     setupComponent(instance)
-    setupRenderEffect(instance, container)
+    setupRenderEffect(instance, initialVNode, container)
 }
 
-function setupRenderEffect(instance: ComponentInternalInstance, container: any) {
-    const subTree = instance.render.call(instance.proxy)
+function setupRenderEffect(
+    instance: ComponentInternalInstance,
+    initialVNode: VNode,
+    container: any
+) {
+    const subTree = instance.render!.call(instance.proxy) as VNode
     patch(subTree, container)
+    initialVNode.el = subTree.el
 }
