@@ -6,7 +6,7 @@ import {
 } from './component'
 import { VNode, VNodeArrayChildren } from './vnode'
 
-/**  */
+/** render */
 export function render(vnode: VNode, container: any) {
     // 调用 patch 方法
     patch(vnode, container)
@@ -40,31 +40,30 @@ const mountElement = (vnode: VNode, container: Element) => {
         el.setAttribute(key, props[key])
     }
 
-    // 处理子节点 子节点可能是 string字符串 或 array数组
-    if (isString(children)) {
-        el.textContent = children
-    } else if (isArray(children)) {
-        mountChildren(children, el)
+    // 处理子节点 子节点可能是 TEXT_CHILDREN 或 ARRAY_CHILDREN
+    if (vnode.shapeFlagHas('TEXT_CHILDREN')) {
+        el.textContent = children as string
+    } else if (vnode.shapeFlagHas('ARRAY_CHILDREN')) {
+        mountChildren(children as VNodeArrayChildren, el)
     }
 
     container.append(el)
 }
+
 /** 挂载子节点 */
 const mountChildren = (vnodeArray: VNodeArrayChildren, container: any) =>
     vnodeArray.forEach((vnode) => patch(vnode as VNode, container))
+
 /** 挂载组件 */
 const mountComponent = (initialVNode: VNode, container: any) => {
     const instance = createComponentInstance(initialVNode)
     setupComponent(instance)
-    setupRenderEffect(instance, initialVNode, container)
+    setupRenderEffect(instance, container)
 }
 
-function setupRenderEffect(
-    instance: ComponentInternalInstance,
-    initialVNode: VNode,
-    container: any
-) {
+/** setupRenderEffect */
+function setupRenderEffect(instance: ComponentInternalInstance, container: any) {
     const subTree = instance.render!.call(instance.proxy) as VNode
     patch(subTree, container)
-    initialVNode.el = subTree.el
+    instance.vnode.el = subTree.el
 }

@@ -1,4 +1,4 @@
-import { EMPTY_OBJ, hasOwn, isObject } from '../../shared/index'
+import { EMPTY_OBJ, isObject } from '../../shared/index'
 import { publicInstanceProxyHandlers } from './componentPublicInstance'
 import { VNode, VNodeChildren } from './vnode'
 

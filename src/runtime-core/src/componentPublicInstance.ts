@@ -1,14 +1,15 @@
-import { hasOwn } from '../../shared/index'
+import { extend, hasOwn } from '../../shared/index'
 import { ComponentInternalInstance } from './component'
 export interface ComponentRenderContext {
     _: ComponentInternalInstance
 }
 type PublicPropertiesMap = Record<string, (i: ComponentInternalInstance) => any>
 
-export const publicPropertiesMap: PublicPropertiesMap = {
+export const publicPropertiesMap: PublicPropertiesMap = extend(Object.create(null), {
     $el: (i) => i.vnode.el
-}
+} as PublicPropertiesMap)
 
+/** publicInstanceProxyHandlers */
 export const publicInstanceProxyHandlers: ProxyHandler<any> = {
     get({ _: instance }: ComponentRenderContext, key: string) {
         const { setupState } = instance
