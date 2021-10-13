@@ -1,4 +1,4 @@
-import { isArray, isObject, isString } from '../../shared/index'
+import { isObject, isString } from '../../shared/index'
 import {
     ComponentInternalInstance,
     createComponentInstance,
