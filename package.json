@@ -1,6 +1,7 @@
 {
     "name": "mini-vue",
     "version": "1.0.0",
+    "types": "lib/types/mini-vue3.d.ts",
     "main": "lib/mini-vue3.cjs.js",
     "module": "lib/mini-vue3.esm.js",
     "license": "MIT",
@@ -20,6 +21,7 @@
         "babel-jest": "^27.1.0",
         "jest": "^27.1.0",
         "rollup": "^2.58.0",
+        "rollup-plugin-dts": "^4.0.0",
         "ts-node": "^10.2.1",
         "tslib": "^2.3.1",
         "typescript": "^4.4.2"
