@@ -29,10 +29,10 @@ In order to learn vue source code
 3. refs
 
     - [x] ref
-    - [ ] shallowRef
+    - [x] shallowRef
     - [x] isRef
-    - [ ] toRef
-    - [ ] toRefs
+    - [x] toRef
+    - [x] toRefs
     - [x] unref
     - [x] proxyRefs
     - [ ] customRef
