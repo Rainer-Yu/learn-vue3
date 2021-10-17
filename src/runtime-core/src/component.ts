@@ -66,10 +66,10 @@ export function setupComponent(instance: ComponentInternalInstance) {
 
 /** 初始化 有状态的(非函数式)组件 */
 function setupStatefulComponent(instance: ComponentInternalInstance) {
-    const component = instance.type
+    const { type: component, ctx } = instance
 
     // context
-    instance.proxy = new Proxy({ _: instance }, publicInstanceProxyHandlers)
+    instance.proxy = new Proxy(ctx, publicInstanceProxyHandlers)
 
     const { setup } = component
     if (setup) {
@@ -94,8 +94,8 @@ function handleSetupResult(
 }
 
 /** 组件初始化 完成 */
-function finishComponentSetup(instance: any) {
-    const Component = instance.type
+function finishComponentSetup(instance: ComponentInternalInstance) {
+    const { type: component } = instance
 
-    instance.render = Component.render
+    instance.render = component.render
 }

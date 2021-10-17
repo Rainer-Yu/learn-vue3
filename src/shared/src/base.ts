@@ -10,3 +10,5 @@ export const objectToString = Object.prototype.toString
 export const hasChanged = (val: any, newVal: any): boolean => !Object.is(val, newVal)
 /** 空对象 */
 export const EMPTY_OBJ: { readonly [key: string]: any } = {}
+/** 是on开头的事件 */
+export const isOn = (key: string) => /^on[A-Z]/.test(key)

@@ -1,4 +1,10 @@
-import { extend, isString, shapeFlagMap, ShapeFlags } from '../../shared/index'
+import {
+    extend,
+    isFunction,
+    isString,
+    shapeFlagMap,
+    ShapeFlags
+} from '../../shared/index'
 import { Component, Data } from './component'
 
 export type VNodeTypes = string | VNode | Component
@@ -26,11 +32,10 @@ export const createVNode = (
         children,
         el: null,
         shapeFlag
-    }) as unknown as VNode
-    console.log('vnode', vnode)
+    } as VNode)
 
     /* 子节点是文本时 标为 TEXT_CHILDREN 否则视为 ARRAY_CHILDREN */
-    vnode.setShapeFlag(isString(children) ? 'TEXT_CHILDREN' : 'ARRAY_CHILDREN')
+    vnode.shapeFlagMark(isString(children) ? 'TEXT_CHILDREN' : 'ARRAY_CHILDREN')
 
     return vnode
 }
@@ -43,18 +48,20 @@ export class VNode {
     /**
      * 为 shapeFlag 添加xxx标志
      */
-    setShapeFlag(flagName: keyof typeof ShapeFlags) {
-        console.log('vnode', this)
-
+    shapeFlagMark(flagName: keyof typeof ShapeFlags) {
         this.shapeFlag! |= shapeFlagMap[flagName]
     }
     /**
      * shapeFlag 有 xxx 标志
      */
-    shapeFlagHas(flagName: keyof typeof ShapeFlags) {
+    shapeFlagIs(flagName: keyof typeof ShapeFlags) {
         return !!(this.shapeFlag! & shapeFlagMap[flagName])
     }
 }
 /** 初始化VNode的默认shapeFlags */
 const initShapFlag = (type: VNodeTypes) =>
-    isString(type) ? ShapeFlags.ELEMENT : ShapeFlags.STATEFUL_COMPONENT
+    isString(type)
+        ? ShapeFlags.ELEMENT
+        : isFunction(type)
+        ? ShapeFlags.FUNCTIONAL_COMPONENT
+        : ShapeFlags.STATEFUL_COMPONENT
