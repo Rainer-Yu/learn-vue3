@@ -1,4 +1,4 @@
-import { isFunction, isObject, isOn, isString } from '../../shared/index'
+import { isFunction, isObject, isOn, isString, ShapeFlags } from '../../shared/index'
 import {
     ComponentInternalInstance,
     createComponentInstance,
@@ -33,7 +33,7 @@ const processComponent = (vnode: VNode, container: any) =>
 /** 挂载Element */
 const mountElement = (vnode: VNode, container: Element) => {
     // 根据tagName创建HTML节点
-    const el: Element = (vnode.el = document.createElement(vnode.type))
+    const el: Element = (vnode.el = document.createElement(vnode.type as string))
 
     const { children, props } = vnode
     // 处理 props 通过循环给DOM节点设置属性
@@ -47,10 +47,10 @@ const mountElement = (vnode: VNode, container: Element) => {
     }
 
     // 处理子节点 子节点可能是 TEXT_CHILDREN 或 ARRAY_CHILDREN
-    if (vnode.shapeFlagIs('TEXT_CHILDREN')) {
+    if (vnode.shapeFlag & ShapeFlags.TEXT_CHILDREN) {
         // 获取el节点及其后代的文本内容并把子节点替换为文本
         el.textContent = children as string
-    } else if (vnode.shapeFlagIs('ARRAY_CHILDREN')) {
+    } else if (vnode.shapeFlag & ShapeFlags.ARRAY_CHILDREN) {
         mountChildren(children as VNodeArrayChildren, el)
     }
     // 将el节点插入到容器节点的子末位

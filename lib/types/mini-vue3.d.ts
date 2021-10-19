@@ -12,7 +12,10 @@ declare const enum ShapeFlags {
     COMPONENT = 6
 }
 
-declare type Component = any;
+declare type Component = {
+    setup: (props: object) => object;
+    render: () => (type: any, props?: any, children?: any) => VNode;
+};
 
 declare type VNodeTypes = string | VNode | Component;
 interface VNode {
@@ -21,6 +24,8 @@ interface VNode {
     children: VNodeChildren | null;
     el: Element | null;
     shapeFlag: ShapeFlags;
+}
+declare class VNode {
 }
 declare type VNodeChildAtom = VNode | string | number | boolean | null | undefined | void;
 declare type VNodeArrayChildren = Array<VNodeArrayChildren | VNodeChildAtom>;

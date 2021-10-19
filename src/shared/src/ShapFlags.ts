@@ -8,11 +8,3 @@ export const enum ShapeFlags {
     ARRAY_CHILDREN = 1 << 4,
     COMPONENT = ShapeFlags.STATEFUL_COMPONENT | ShapeFlags.FUNCTIONAL_COMPONENT
 }
-export const shapeFlagMap = extend(Object.create(null), {
-    ELEMENT: ShapeFlags.ELEMENT,
-    FUNCTIONAL_COMPONENT: ShapeFlags.FUNCTIONAL_COMPONENT,
-    STATEFUL_COMPONENT: ShapeFlags.STATEFUL_COMPONENT,
-    COMPONENT: ShapeFlags.COMPONENT,
-    TEXT_CHILDREN: ShapeFlags.TEXT_CHILDREN,
-    ARRAY_CHILDREN: ShapeFlags.ARRAY_CHILDREN
-})
