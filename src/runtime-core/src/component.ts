@@ -1,5 +1,6 @@
 import { shallowReadonly } from '../../reactivity/index'
 import { EMPTY_OBJ, isObject } from '../../shared/index'
+import { emit } from './componentEmit'
 import { initProps } from './componentProps'
 import { publicInstanceProxyHandlers } from './componentPublicInstance'
 import { VNode, VNodeChildren } from './vnode'
@@ -19,7 +20,8 @@ export type InternalRenderFunction = {
 // 组件实例对象接口
 export interface ComponentInternalInstance {
     vnode: VNode
-    props: object
+    props: Data
+    emit: Function
     type: any
     /**
      * 返回vdom树的渲染函数
@@ -51,6 +53,7 @@ export function createComponentInstance(vnode: VNode): ComponentInternalInstance
     const instance = {
         vnode,
         props: EMPTY_OBJ,
+        emit: () => {},
         type,
         render: null,
         subTree: null!,
@@ -58,6 +61,7 @@ export function createComponentInstance(vnode: VNode): ComponentInternalInstance
         proxy: null,
         ctx: EMPTY_OBJ
     }
+    instance.emit = emit.bind(null, instance) as any
     instance.ctx = { _: instance }
 
     return instance
@@ -84,7 +88,7 @@ function setupStatefulComponent(instance: ComponentInternalInstance) {
     instance.proxy = new Proxy(ctx, publicInstanceProxyHandlers)
 
     if (setup) {
-        const setupResult = setup(shallowReadonly(props))
+        const setupResult = setup(shallowReadonly(props), instance)
         handleSetupResult(instance, setupResult)
     }
 }

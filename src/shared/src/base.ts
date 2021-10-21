@@ -12,3 +12,15 @@ export const hasChanged = (val: any, newVal: any): boolean => !Object.is(val, ne
 export const EMPTY_OBJ: { readonly [key: string]: any } = {}
 /** 是on开头的事件 */
 export const isOn = (key: string) => /^on[A-Z]/.test(key)
+
+/* -n 字符串驼峰化 */
+export const camelize = (str: string) =>
+    str.replace(/-(\w)/g, (_, c: string) => {
+        return c ? c.toUpperCase() : ''
+    })
+
+/* 首字母大写 */
+const capitalize = (str: string) => str.charAt(0).toUpperCase() + str.slice(1)
+
+/* 变成事件名称 */
+export const toHandlerKey = (str: string) => (str ? 'on' + capitalize(str) : '')

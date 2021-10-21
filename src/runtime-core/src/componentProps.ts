@@ -1,8 +1,8 @@
-import { ComponentInternalInstance } from './component'
+import { ComponentInternalInstance, Data } from './component'
 
 export function initProps(
     instance: ComponentInternalInstance,
-    rawProps: object | null
+    rawProps: Data | null
 ) {
     instance.props = rawProps || {}
 }
