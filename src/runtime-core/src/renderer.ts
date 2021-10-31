@@ -1,10 +1,10 @@
-import { isFunction, isObject, isOn, isString, ShapeFlags } from '../../shared/index'
+import { isFunction, isOn, ShapeFlags } from '../../shared/index'
 import {
     ComponentInternalInstance,
     createComponentInstance,
     setupComponent
 } from './component'
-import { Fragment, VNode, VNodeArrayChildren } from './vnode'
+import { Fragment, Text, VNode, VNodeArrayChildren } from './vnode'
 
 /** render */
 export function render(vnode: VNode, container: any) {
@@ -20,7 +20,10 @@ function patch(vnode: VNode, container: any) {
             // 处理Fragment类型的vnode
             processFragment(vnode, container)
             break
-
+        case Text:
+            // 处理Fragment类型的vnode
+            processText(vnode, container)
+            break
         default:
             if (shapeFlag & ShapeFlags.ELEMENT) {
                 // 处理Element类型的vnode
@@ -34,8 +37,16 @@ function patch(vnode: VNode, container: any) {
 }
 
 /** 处理Fragment */
+const processText = (vnode: VNode, container: any) => {
+    const { children } = vnode
+    const textNode = (vnode.el = document.createTextNode(children as string))
+    container.append(textNode)
+}
+
+/** 处理Fragment */
 const processFragment = (vnode: VNode, container: any) =>
     mountChildren(vnode.children as VNodeArrayChildren, container)
+
 /** 处理Element */
 const processElement = (vnode: VNode, container: any) =>
     mountElement(vnode, container)

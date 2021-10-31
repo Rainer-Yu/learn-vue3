@@ -1,13 +1,13 @@
 import { isFunction, isString, ShapeFlags } from '../../shared/index'
 import { Component, Data } from './component'
 
-export type VNodeTypes = string | VNode | Component | typeof Fragment
+export type VNodeTypes = string | VNode | Component | typeof Fragment | typeof Text
 
 export interface VNode {
     type: VNodeTypes
     props: Record<string, any> | null
     children: VNodeNormalizedChildren
-    el: Element | null
+    el: Node | null
     shapeFlag: ShapeFlags
 }
 
@@ -21,6 +21,8 @@ export type VNodeNormalizedChildren =
     | null
 
 export const Fragment = Symbol('Fragment')
+export const Text = Symbol('Text')
+
 /** 创建虚拟节点 */
 export const createVNode = (
     type: VNodeTypes,
@@ -56,3 +58,7 @@ const initShapFlag = (type: VNodeTypes) =>
         : isFunction(type)
         ? ShapeFlags.FUNCTIONAL_COMPONENT
         : ShapeFlags.STATEFUL_COMPONENT
+
+export const createTextVNode = (text: string) => {
+    return createVNode(Text, null, text)
+}

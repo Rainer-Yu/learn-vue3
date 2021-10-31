@@ -23,22 +23,24 @@ declare type InternalSlots = {
 };
 declare type Slots = Readonly<InternalSlots>;
 
-declare type VNodeTypes = string | VNode | Component | typeof Fragment;
+declare type VNodeTypes = string | VNode | Component | typeof Fragment | typeof Text;
 interface VNode {
     type: VNodeTypes;
     props: Record<string, any> | null;
     children: VNodeNormalizedChildren;
-    el: Element | null;
+    el: Node | null;
     shapeFlag: ShapeFlags;
 }
 declare type VNodeChildAtom = VNode | string | number | boolean | null | undefined | void;
 declare type VNodeArrayChildren = Array<VNodeArrayChildren | VNodeChildAtom>;
 declare type VNodeNormalizedChildren = string | VNodeArrayChildren | null;
 declare const Fragment: unique symbol;
+declare const Text: unique symbol;
+declare const createTextVNode: (text: string) => VNode;
 
 /** 返回一个`虚拟节点` */
 declare function h(type: any, props?: any, children?: any): VNode;
 
 declare function renderSlots(slots: Slots, slotName: string, props: any): VNode | undefined;
 
-export { createApp, h, renderSlots };
+export { createApp, createTextVNode, h, renderSlots };
