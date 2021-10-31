@@ -53,6 +53,7 @@ const mountElement = (vnode: VNode, container: Element) => {
     } else if (vnode.shapeFlag & ShapeFlags.ARRAY_CHILDREN) {
         mountChildren(children as VNodeArrayChildren, el)
     }
+
     // 将el节点插入到容器节点的子末位
     container.append(el)
 }

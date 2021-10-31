@@ -10,7 +10,7 @@ export interface VNode {
     el: Element | null
     shapeFlag: ShapeFlags
 }
-export class VNode {}
+
 type VNodeChildAtom = VNode | string | number | boolean | null | undefined | void
 export type VNodeArrayChildren = Array<VNodeArrayChildren | VNodeChildAtom>
 export type VNodeChildren = VNodeChildAtom | VNodeArrayChildren
@@ -22,13 +22,13 @@ export const createVNode = (
     children: VNodeChildren = null,
     shapeFlag: ShapeFlags = initShapFlag(type)
 ): VNode => {
-    const vnode = extend(new VNode(), {
+    const vnode = {
         type,
         props,
         children,
         el: null,
         shapeFlag
-    } as VNode)
+    }
 
     /* 子节点是文本时 标为 TEXT_CHILDREN 否则视为 ARRAY_CHILDREN */
     vnode.shapeFlag = isString(children)

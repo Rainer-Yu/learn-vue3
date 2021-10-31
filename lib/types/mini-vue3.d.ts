@@ -25,8 +25,6 @@ interface VNode {
     el: Element | null;
     shapeFlag: ShapeFlags;
 }
-declare class VNode {
-}
 declare type VNodeChildAtom = VNode | string | number | boolean | null | undefined | void;
 declare type VNodeArrayChildren = Array<VNodeArrayChildren | VNodeChildAtom>;
 declare type VNodeChildren = VNodeChildAtom | VNodeArrayChildren;
