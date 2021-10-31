@@ -97,7 +97,11 @@ function setupStatefulComponent(instance: ComponentInternalInstance) {
     instance.proxy = new Proxy(ctx, publicInstanceProxyHandlers)
 
     if (setup) {
+        // 执行 setup 前 将currentInstance指向当前组件的instance
+        setCurrentInstance(instance)
         const setupResult = setup(shallowReadonly(props), instance)
+        // 当前组件的 setup 执行完成后 清空将currentInstance
+        setCurrentInstance(null)
         handleSetupResult(instance, setupResult)
     }
 }
@@ -123,3 +127,11 @@ function finishComponentSetup(instance: ComponentInternalInstance) {
 
     instance.render = component.render
 }
+
+// 组件实例全局变量
+let currentInstance: ComponentInternalInstance | null = null
+// 在setup里获取当前组件的实例
+export const getCurrentInstance = () => currentInstance!
+// 修改组件实例全局变量或清空
+const setCurrentInstance = (instance: ComponentInternalInstance | null) =>
+    (currentInstance = instance)

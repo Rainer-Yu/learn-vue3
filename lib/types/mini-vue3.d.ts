@@ -17,11 +17,32 @@ declare type Component = {
     setup: (props: object) => object;
     render: () => (type: any, props?: any, children?: any) => VNode;
 };
+declare type Data = Record<string, unknown>;
 declare type Slot = (...args: any[]) => VNode[];
 declare type InternalSlots = {
     [name: string]: Slot | undefined;
 };
 declare type Slots = Readonly<InternalSlots>;
+interface ComponentInternalInstance {
+    vnode: VNode;
+    props: Data;
+    emit: Function;
+    slots: InternalSlots;
+    type: any;
+    /**
+     * 此组件vdom树的 根vnode(虚拟节点)
+     */
+    subTree: VNode;
+    /**
+     * proxy
+     */
+    proxy: any;
+    /**
+     * ctx
+     */
+    ctx: Data;
+}
+declare const getCurrentInstance: () => ComponentInternalInstance;
 
 declare type VNodeTypes = string | VNode | Component | typeof Fragment | typeof Text;
 interface VNode {
@@ -43,4 +64,4 @@ declare function h(type: any, props?: any, children?: any): VNode;
 
 declare function renderSlots(slots: Slots, slotName: string, props: any): VNode | undefined;
 
-export { createApp, createTextVNode, h, renderSlots };
+export { createApp, createTextVNode, getCurrentInstance, h, renderSlots };
