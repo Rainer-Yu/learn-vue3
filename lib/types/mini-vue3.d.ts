@@ -23,7 +23,7 @@ declare type InternalSlots = {
 };
 declare type Slots = Readonly<InternalSlots>;
 
-declare type VNodeTypes = string | VNode | Component;
+declare type VNodeTypes = string | VNode | Component | typeof Fragment;
 interface VNode {
     type: VNodeTypes;
     props: Record<string, any> | null;
@@ -34,6 +34,7 @@ interface VNode {
 declare type VNodeChildAtom = VNode | string | number | boolean | null | undefined | void;
 declare type VNodeArrayChildren = Array<VNodeArrayChildren | VNodeChildAtom>;
 declare type VNodeNormalizedChildren = string | VNodeArrayChildren | null;
+declare const Fragment: unique symbol;
 
 /** 返回一个`虚拟节点` */
 declare function h(type: any, props?: any, children?: any): VNode;

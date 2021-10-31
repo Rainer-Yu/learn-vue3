@@ -4,7 +4,7 @@ import {
     createComponentInstance,
     setupComponent
 } from './component'
-import { VNode, VNodeArrayChildren } from './vnode'
+import { Fragment, VNode, VNodeArrayChildren } from './vnode'
 
 /** render */
 export function render(vnode: VNode, container: any) {
@@ -14,18 +14,32 @@ export function render(vnode: VNode, container: any) {
 
 /** 处理各种vnode */
 function patch(vnode: VNode, container: any) {
-    if (isString(vnode.type)) {
-        // 处理Element类型的vnode
-        processElement(vnode, container)
-    } else if (isObject(vnode.type)) {
-        // 处理组件vnode
-        processComponent(vnode, container)
+    const { type, shapeFlag } = vnode
+    switch (type) {
+        case Fragment:
+            // 处理Fragment类型的vnode
+            processFragment(vnode, container)
+            break
+
+        default:
+            if (shapeFlag & ShapeFlags.ELEMENT) {
+                // 处理Element类型的vnode
+                processElement(vnode, container)
+            } else if (shapeFlag & ShapeFlags.STATEFUL_COMPONENT) {
+                // 处理有状态的组件vnode
+                processComponent(vnode, container)
+            }
+            break
     }
 }
 
+/** 处理Fragment */
+const processFragment = (vnode: VNode, container: any) =>
+    mountChildren(vnode.children as VNodeArrayChildren, container)
 /** 处理Element */
 const processElement = (vnode: VNode, container: any) =>
     mountElement(vnode, container)
+
 /** 处理组件 */
 const processComponent = (vnode: VNode, container: any) =>
     mountComponent(vnode, container)

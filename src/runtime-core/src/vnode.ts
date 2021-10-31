@@ -1,7 +1,7 @@
-import { extend, isFunction, isString, ShapeFlags } from '../../shared/index'
+import { isFunction, isString, ShapeFlags } from '../../shared/index'
 import { Component, Data } from './component'
 
-export type VNodeTypes = string | VNode | Component
+export type VNodeTypes = string | VNode | Component | typeof Fragment
 
 export interface VNode {
     type: VNodeTypes
@@ -20,9 +20,10 @@ export type VNodeNormalizedChildren =
     //   | RawSlots
     | null
 
+export const Fragment = Symbol('Fragment')
 /** 创建虚拟节点 */
 export const createVNode = (
-    type: string | Component,
+    type: VNodeTypes,
     props: Data | null = null,
     children: VNodeNormalizedChildren = null,
     shapeFlag: ShapeFlags = initShapFlag(type)
@@ -33,7 +34,7 @@ export const createVNode = (
         children,
         el: null,
         shapeFlag
-    }
+    } as VNode
 
     /* 子节点是文本时 标为 TEXT_CHILDREN 否则视为 ARRAY_CHILDREN */
     vnode.shapeFlag |= isString(children)
