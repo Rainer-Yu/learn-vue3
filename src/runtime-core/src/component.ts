@@ -98,10 +98,17 @@ function setupStatefulComponent(instance: ComponentInternalInstance) {
 
     if (setup) {
         // 执行 setup 前 将currentInstance指向当前组件的instance
+<<<<<<< HEAD
         setCurrentInstance(instance)
         const setupResult = setup(shallowReadonly(props), instance)
         // 当前组件的 setup 执行完成后 清空将currentInstance
         setCurrentInstance(null)
+=======
+        currentInstance = instance
+        const setupResult = setup(shallowReadonly(props), instance)
+        // 当前组件的 setup 执行完成后 清空将currentInstance
+        currentInstance = null
+>>>>>>> 9d548f35cbfd54fa70305b4501dd70b4a76bb783
         handleSetupResult(instance, setupResult)
     }
 }
