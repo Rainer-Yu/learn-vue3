@@ -3,6 +3,7 @@ import { EMPTY_OBJ, isObject } from '../../shared/index'
 import { emit } from './componentEmit'
 import { initProps } from './componentProps'
 import { publicInstanceProxyHandlers } from './componentPublicInstance'
+import { initSlots } from './componentSlots'
 import { VNode, VNodeChildren } from './vnode'
 
 export type Component = {
@@ -10,6 +11,12 @@ export type Component = {
     render: () => (type: any, props?: any, children?: any) => VNode
 }
 export type Data = Record<string, unknown>
+
+export type Slot = (...args: any[]) => VNode[]
+export type InternalSlots = {
+    [name: string]: Slot | undefined
+}
+export type Slots = Readonly<InternalSlots>
 
 /**
  * @internal
@@ -22,6 +29,7 @@ export interface ComponentInternalInstance {
     vnode: VNode
     props: Data
     emit: Function
+    slots: InternalSlots
     type: any
     /**
      * 返回vdom树的渲染函数
@@ -54,6 +62,7 @@ export function createComponentInstance(vnode: VNode): ComponentInternalInstance
         vnode,
         props: EMPTY_OBJ,
         emit: () => {},
+        slots: EMPTY_OBJ,
         type,
         render: null,
         subTree: null!,
@@ -69,9 +78,9 @@ export function createComponentInstance(vnode: VNode): ComponentInternalInstance
 
 /** 初始化组件 */
 export function setupComponent(instance: ComponentInternalInstance) {
-    // TODO
-    initProps(instance, instance.vnode.props)
-    // initSlots()
+    const { props, children } = instance.vnode
+    initProps(instance, props)
+    initSlots(instance, children)
     setupStatefulComponent(instance)
 }
 

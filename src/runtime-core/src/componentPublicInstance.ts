@@ -6,7 +6,8 @@ export interface ComponentRenderContext {
 type PublicPropertiesMap = Record<string, (i: ComponentInternalInstance) => any>
 
 export const publicPropertiesMap: PublicPropertiesMap = extend(Object.create(null), {
-    $el: (i) => i.vnode.el
+    $el: (i) => i.vnode.el,
+    $slots: (i) => i.slots
 } as PublicPropertiesMap)
 
 /** publicInstanceProxyHandlers */

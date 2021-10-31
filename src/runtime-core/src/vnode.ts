@@ -6,7 +6,7 @@ export type VNodeTypes = string | VNode | Component
 export interface VNode {
     type: VNodeTypes
     props: Record<string, any> | null
-    children: VNodeChildren | null
+    children: VNodeNormalizedChildren
     el: Element | null
     shapeFlag: ShapeFlags
 }
@@ -14,12 +14,17 @@ export interface VNode {
 type VNodeChildAtom = VNode | string | number | boolean | null | undefined | void
 export type VNodeArrayChildren = Array<VNodeArrayChildren | VNodeChildAtom>
 export type VNodeChildren = VNodeChildAtom | VNodeArrayChildren
+export type VNodeNormalizedChildren =
+    | string
+    | VNodeArrayChildren
+    //   | RawSlots
+    | null
 
 /** 创建虚拟节点 */
 export const createVNode = (
     type: string | Component,
     props: Data | null = null,
-    children: VNodeChildren = null,
+    children: VNodeNormalizedChildren = null,
     shapeFlag: ShapeFlags = initShapFlag(type)
 ): VNode => {
     const vnode = {
@@ -31,9 +36,15 @@ export const createVNode = (
     }
 
     /* 子节点是文本时 标为 TEXT_CHILDREN 否则视为 ARRAY_CHILDREN */
-    vnode.shapeFlag = isString(children)
+    vnode.shapeFlag |= isString(children)
         ? ShapeFlags.TEXT_CHILDREN
         : ShapeFlags.ARRAY_CHILDREN
+
+    if (vnode.shapeFlag & ShapeFlags.STATEFUL_COMPONENT) {
+        if (typeof children === 'object') {
+            vnode.shapeFlag |= ShapeFlags.SLOT_CHILDREN
+        }
+    }
 
     return vnode
 }
